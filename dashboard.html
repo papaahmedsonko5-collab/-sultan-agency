@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050505">
+<title>Dashboard — Sultan Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@200;300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#050505; --black2:#0D0D0D; --black3:#161616;
+  --gold:#C9A84C; --gold2:#E8C96A; --gold3:#F5E0A0;
+  --gold-dim:rgba(201,168,76,0.12);
+  --grey:#888; --white:#FAFAF8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black); color:var(--white); font-family:'DM Sans',sans-serif; font-weight:300;}
+
+/* NAV */
+nav{
+  position:sticky; top:0; z-index:100; padding:20px 48px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(5,5,5,0.9); backdrop-filter:blur(6px);
+  border-bottom:1px solid rgba(201,168,76,0.12);
+}
+.nav-logo{ font-family:'Playfair Display',serif; font-size:16px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; text-decoration:none;}
+.nav-links{ display:flex; gap:28px; list-style:none; align-items:center;}
+.nav-links a{ font-size:10px; font-weight:400; letter-spacing:2px; text-transform:uppercase; color:rgba(250,250,248,0.5); text-decoration:none; transition:color .2s;}
+.nav-links a:hover{ color:var(--gold);}
+.nav-links a.active{ color:var(--gold);}
+
+/* LAYOUT */
+main{ max-width:1180px; margin:0 auto; padding:56px 32px 100px;}
+.pagehead{ margin-bottom:44px;}
+.eyebrow{ font-size:10px; letter-spacing:5px; color:var(--gold); text-transform:uppercase; opacity:.85; margin-bottom:14px;}
+h1{ font-family:'Playfair Display',serif; font-weight:900; font-size:clamp(32px,5vw,50px); line-height:1.05;}
+h1 em{ font-style:italic; background:linear-gradient(135deg,var(--gold),var(--gold3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;}
+.sub{ margin-top:14px; font-size:13px; color:rgba(250,250,248,0.45); letter-spacing:.5px; max-width:520px;}
+
+section{ margin-bottom:64px;}
+.section-title{ display:flex; align-items:center; gap:14px; margin-bottom:24px;}
+.section-title .idx{ font-family:'Playfair Display',serif; font-weight:700; color:var(--gold); font-size:13px; border:1px solid rgba(201,168,76,0.4); border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+.section-title h2{ font-family:'Playfair Display',serif; font-weight:700; font-size:19px; letter-spacing:.5px;}
+.section-title .rule{ flex:1; height:1px; background:linear-gradient(90deg, rgba(201,168,76,0.5), transparent);}
+
+/* STAT CARDS */
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+.stat{ background:var(--black2); border:1px solid rgba(201,168,76,0.15); border-radius:10px; padding:20px 20px 18px; position:relative; overflow:hidden;}
+.stat .label{ font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:var(--gold2); margin-bottom:10px;}
+.stat .value{ font-family:'Playfair Display',serif; font-weight:900; font-size:30px; color:var(--white);}
+.stat .hint{ font-size:11px; color:rgba(250,250,248,0.4); margin-top:6px;}
+.bar{ margin-top:12px; height:5px; background:rgba(250,250,248,0.08); border-radius:4px; overflow:hidden;}
+.bar-fill{ height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); transition:width .4s ease;}
+
+/* CARD PANEL */
+.panel{ background:var(--black2); border:1px solid rgba(201,168,76,0.15); border-radius:12px; padding:26px 26px 22px;}
+
+/* PACKS */
+.packs-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+.packcard{ background:var(--black3); border:1px solid rgba(201,168,76,0.15); border-radius:10px; padding:20px;}
+.packcard .pname{ font-family:'Playfair Display',serif; font-weight:700; font-size:16px; color:var(--gold2); letter-spacing:.5px;}
+.packcard .pprice{ font-size:11px; color:rgba(250,250,248,0.4); margin-top:2px; margin-bottom:16px;}
+.counter{ display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.counter button{ width:32px; height:32px; border-radius:50%; border:1px solid rgba(201,168,76,0.4); background:transparent; color:var(--gold); font-size:16px; cursor:pointer; transition:.2s;}
+.counter button:hover{ background:var(--gold); color:var(--black);}
+.counter .n{ font-family:'Playfair Display',serif; font-weight:900; font-size:24px; min-width:38px; text-align:center;}
+.packcard .sub{ margin-top:10px; font-size:10.5px; color:rgba(250,250,248,0.4);}
+
+/* TABLE (sponsors) */
+table{ width:100%; border-collapse:collapse;}
+th{ text-align:left; font-size:9.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold2); padding:0 10px 10px; font-weight:500; border-bottom:1px solid rgba(201,168,76,0.2);}
+td{ padding:12px 10px; font-size:12.5px; border-bottom:1px solid rgba(250,250,248,0.06); vertical-align:middle;}
+tr:last-child td{ border-bottom:none;}
+.tag{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; letter-spacing:.5px; text-transform:uppercase; font-weight:500;}
+.tag.bronze{ background:rgba(176,141,87,0.18); color:#D2A96B;}
+.tag.gold{ background:rgba(201,168,76,0.2); color:var(--gold2);}
+.tag.premium{ background:rgba(255,255,255,0.08); color:var(--white);}
+.tag.titre{ background:var(--gold); color:var(--black);}
+.status{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px;}
+.dot{ width:7px; height:7px; border-radius:50%;}
+.dot.contacte{ background:#8a8a8a;}
+.dot.negociation{ background:#E8B84C;}
+.dot.confirme{ background:#5FBF7A;}
+select, input[type=text], input[type=number]{
+  background:var(--black3); border:1px solid rgba(201,168,76,0.25); color:var(--white);
+  font-family:'DM Sans',sans-serif; font-size:12px; padding:8px 10px; border-radius:6px; outline:none;
+}
+select:focus, input:focus{ border-color:var(--gold);}
+.row-del{ cursor:pointer; color:rgba(250,250,248,0.35); font-size:14px; transition:.2s;}
+.row-del:hover{ color:#E06060;}
+
+.addbar{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:18px; border-top:1px dashed rgba(201,168,76,0.2);}
+.addbar input, .addbar select{ flex:1; min-width:120px;}
+.btn-primary{ display:inline-flex; align-items:center; gap:8px; padding:10px 22px; background:var(--gold); color:var(--black); font-size:9.5px; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; border:none; border-radius:6px; cursor:pointer; transition:.2s;}
+.btn-primary:hover{ background:var(--gold2);}
+.btn-ghost{ display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:transparent; color:rgba(250,250,248,0.6); font-size:9.5px; font-weight:500; letter-spacing:2px; text-transform:uppercase; border:1px solid rgba(250,250,248,0.15); border-radius:6px; cursor:pointer; transition:.2s;}
+.btn-ghost:hover{ border-color:var(--gold); color:var(--gold);}
+
+/* TASKS */
+.task-list{ list-style:none;}
+.task{ display:flex; align-items:center; gap:14px; padding:12px 4px; border-bottom:1px solid rgba(250,250,248,0.06);}
+.task:last-child{ border-bottom:none;}
+.task input[type=checkbox]{ width:18px; height:18px; accent-color:var(--gold); cursor:pointer; flex:0 0 auto;}
+.task span{ flex:1; font-size:13px;}
+.task.done span{ color:rgba(250,250,248,0.35); text-decoration:line-through;}
+.task .row-del{ margin-left:auto;}
+
+.foot-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:8px;}
+.footer{ text-align:center; padding:40px 0 10px; font-size:11px; letter-spacing:1px; color:rgba(250,250,248,0.3);}
+.footer em{ color:var(--gold2); font-style:italic;}
+
+@media(max-width:820px){
+  .stats{ grid-template-columns:repeat(2,1fr);}
+  .packs-grid{ grid-template-columns:1fr;}
+  nav{ padding:16px 20px;}
+  main{ padding:36px 16px 80px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Sultan Agency</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Site</a></li>
+    <li><a href="#packs">Packs</a></li>
+    <li><a href="#sponsors">Sponsors</a></li>
+    <li><a href="#taches">Tâches</a></li>
+    <li><a href="#" class="active">Dashboard</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="pagehead">
+    <div class="eyebrow">Sultan Agency — Espace interne</div>
+    <h1>Dashboard <em>Sultan Movie Night</em></h1>
+    <div class="sub">Suivi des ventes de packs, des sponsors et des tâches restantes avant le 26 décembre 2026.</div>
+  </div>
+
+  <!-- RÉSUMÉ -->
+  <section>
+    <div class="section-title"><div class="idx">1</div><h2>RÉSUMÉ</h2><div class="rule"></div></div>
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Participants</div>
+        <div class="value" id="statParticipants">0</div>
+        <div class="hint" id="statCapacityHint">sur 100–300 visés</div>
+        <div class="bar"><div class="bar-fill" id="barCapacity" style="width:0%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="label">Revenus billetterie</div>
+        <div class="value" id="statTicketRevenue">0 F</div>
+        <div class="hint">SOLO + DUO + CREW</div>
+      </div>
+      <div class="stat">
+        <div class="label">Sponsoring confirmé</div>
+        <div class="value" id="statSponsorConfirmed">0 F</div>
+        <div class="hint" id="statSponsorCountHint">0 partenaire confirmé</div>
+      </div>
+      <div class="stat">
+        <div class="label">Tâches restantes</div>
+        <div class="value" id="statTasksLeft">0</div>
+        <div class="hint" id="statTasksHint">sur 0 au total</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PACKS -->
+  <section id="packs">
+    <div class="section-title"><div class="idx">2</div><h2>PACKS VENDUS</h2><div class="rule"></div></div>
+    <div class="packs-grid">
+      <div class="packcard">
+        <div class="pname">SULTAN SOLO</div>
+        <div class="pprice">5 000 F · 1 entrée</div>
+        <div class="counter">
+          <button onclick="changePack('solo',-1)">−</button>
+          <div class="n" id="soloCount">0</div>
+          <button onclick="changePack('solo',1)">+</button>
+        </div>
+        <div class="sub" id="soloSub">0 entrées · 0 F</div>
+      </div>
+      <div class="packcard">
+        <div class="pname">SULTAN DUO</div>
+        <div class="pprice">11 000 F · 2 entrées</div>
+        <div class="counter">
+          <button onclick="changePack('duo',-1)">−</button>
+          <div class="n" id="duoCount">0</div>
+          <button onclick="changePack('duo',1)">+</button>
+        </div>
+        <div class="sub" id="duoSub">0 entrées · 0 F</div>
+      </div>
+      <div class="packcard">
+        <div class="pname">SULTAN CREW</div>
+        <div class="pprice">20 000 F · 5 entrées</div>
+        <div class="counter">
+          <button onclick="changePack('crew',-1)">−</button>
+          <div class="n" id="crewCount">0</div>
+          <button onclick="changePack('crew',1)">+</button>
+        </div>
+        <div class="sub" id="crewSub">0 entrées · 0 F</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPONSORS -->
+  <section id="sponsors">
+    <div class="section-title"><div class="idx">3</div><h2>SPONSORS</h2><div class="rule"></div></div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Marque</th><th>Formule</th><th>Statut</th><th>Montant</th><th></th></tr></thead>
+        <tbody id="sponsorRows"></tbody>
+      </table>
+      <div class="addbar">
+        <input type="text" id="spName" placeholder="Nom de la marque">
+        <select id="spTier">
+          <option value="bronze">Bronze — 150 000 F</option>
+          <option value="gold">Gold — 300 000 F</option>
+          <option value="premium">Premium — 500 000 F</option>
+          <option value="titre">Partenaire Titre — Sur mesure</option>
+        </select>
+        <select id="spStatus">
+          <option value="contacte">Contacté</option>
+          <option value="negociation">En négociation</option>
+          <option value="confirme">Confirmé</option>
+        </select>
+        <input type="number" id="spAmount" placeholder="Montant (F)" style="max-width:140px;">
+        <button class="btn-primary" onclick="addSponsor()">+ Ajouter</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TÂCHES -->
+  <section id="taches">
+    <div class="section-title"><div class="idx">4</div><h2>TÂCHES</h2><div class="rule"></div></div>
+    <div class="panel">
+      <ul class="task-list" id="taskList"></ul>
+      <div class="addbar">
+        <input type="text" id="taskInput" placeholder="Nouvelle tâche…" onkeydown="if(event.key==='Enter')addTask()">
+        <button class="btn-primary" onclick="addTask()">+ Ajouter</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot-actions">
+    <button class="btn-ghost" onclick="exportData()">Exporter (JSON)</button>
+    <button class="btn-ghost" onclick="importData()">Importer</button>
+    <button class="btn-ghost" onclick="resetData()">Réinitialiser</button>
+  </div>
+
+  <div class="footer">Sultan Agency — <em>Vivre. Partager. Vibrer.</em> · données stockées localement dans ce navigateur</div>
+</main>
+
+<script>
+const STORE_KEY = 'sultan_dashboard_v1';
+const PACK_PRICES = { solo: 5000, duo: 11000, crew: 20000 };
+const PACK_ENTRIES = { solo: 1, duo: 2, crew: 5 };
+const TIER_LABELS = { bronze:'Bronze', gold:'Gold', premium:'Premium', titre:'Titre' };
+const TIER_AMOUNTS = { bronze:150000, gold:300000, premium:500000, titre:null };
+const STATUS_LABELS = { contacte:'Contacté', negociation:'En négociation', confirme:'Confirmé' };
+
+function defaultState(){
+  return {
+    packs: { solo:0, duo:0, crew:0 },
+    sponsors: [],
+    tasks: [
+      { text:'Confirmer la salle avec le cinéma partenaire', done:false },
+      { text:'Finaliser le contrat des sponsors Gold/Premium', done:false },
+      { text:'Lancer la billetterie en ligne', done:false },
+      { text: "Préparer le Sultan Intro (vidéo d'ouverture)", done:false },
+      { text:'Commander les popcorns personnalisés', done:false }
+    ]
+  };
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultState();
+    return JSON.parse(raw);
+  }catch(e){ return defaultState(); }
+}
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); render(); }
+
+var state = loadState();
+
+function changePack(key, delta){
+  state.packs[key] = Math.max(0, (state.packs[key]||0) + delta);
+  saveState();
+}
+
+function addSponsor(){
+  const name = document.getElementById('spName').value.trim();
+  const tier = document.getElementById('spTier').value;
+  const status = document.getElementById('spStatus').value;
+  let amount = document.getElementById('spAmount').value;
+  amount = amount ? parseInt(amount,10) : (TIER_AMOUNTS[tier] || 0);
+  if(!name) return;
+  state.sponsors.push({ name, tier, status, amount });
+  document.getElementById('spName').value='';
+  document.getElementById('spAmount').value='';
+  saveState();
+}
+function removeSponsor(i){ state.sponsors.splice(i,1); saveState(); }
+function setSponsorStatus(i, val){ state.sponsors[i].status = val; saveState(); }
+
+function addTask(){
+  const input = document.getElementById('taskInput');
+  const text = input.value.trim();
+  if(!text) return;
+  state.tasks.push({ text, done:false });
+  input.value='';
+  saveState();
+}
+function toggleTask(i){ state.tasks[i].done = !state.tasks[i].done; saveState(); }
+function removeTask(i){ state.tasks.splice(i,1); saveState(); }
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sultan-dashboard-export.json';
+  a.click();
+}
+function importData(){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'application/json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try{ state = JSON.parse(ev.target.result); saveState(); }
+      catch(err){ alert('Fichier invalide.'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function resetData(){
+  if(confirm('Réinitialiser toutes les données du dashboard ?')){
+    state = defaultState(); saveState();
+  }
+}
+
+function fmt(n){ return n.toLocaleString('fr-FR') + ' F'; }
+
+function render(){
+  // packs
+  ['solo','duo','crew'].forEach(k=>{
+    document.getElementById(k+'Count').textContent = state.packs[k];
+    const entries = state.packs[k]*PACK_ENTRIES[k];
+    const revenue = state.packs[k]*PACK_PRICES[k];
+    document.getElementById(k+'Sub').textContent = entries+' entrées · '+fmt(revenue);
+  });
+  const totalEntries = ['solo','duo','crew'].reduce((s,k)=>s+state.packs[k]*PACK_ENTRIES[k],0);
+  const totalTicketRevenue = ['solo','duo','crew'].reduce((s,k)=>s+state.packs[k]*PACK_PRICES[k],0);
+  document.getElementById('statParticipants').textContent = totalEntries;
+  document.getElementById('statTicketRevenue').textContent = fmt(totalTicketRevenue);
+  const pct = Math.min(100, Math.round((totalEntries/300)*100));
+  document.getElementById('barCapacity').style.width = pct+'%';
+  document.getElementById('statCapacityHint').textContent = totalEntries+' sur 100–300 visés';
+
+  // sponsors
+  const tbody = document.getElementById('sponsorRows');
+  tbody.innerHTML = '';
+  let confirmedTotal = 0, confirmedCount = 0;
+  state.sponsors.forEach((s,i)=>{
+    if(s.status==='confirme'){ confirmedTotal += (s.amount||0); confirmedCount++; }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.name}</td>
+      <td><span class="tag ${s.tier}">${TIER_LABELS[s.tier]}</span></td>
+      <td>
+        <select onchange="setSponsorStatus(${i}, this.value)">
+          ${Object.entries(STATUS_LABELS).map(([k,l])=>`<option value="${k}" ${s.status===k?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </td>
+      <td>${s.amount ? fmt(s.amount) : '—'}</td>
+      <td><span class="row-del" onclick="removeSponsor(${i})">✕</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('statSponsorConfirmed').textContent = fmt(confirmedTotal);
+  document.getElementById('statSponsorCountHint').textContent = confirmedCount + (confirmedCount>1 ? ' partenaires confirmés' : ' partenaire confirmé');
+
+  // tasks
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  state.tasks.forEach((t,i)=>{
+    const li = document.createElement('li');
+    li.className = 'task' + (t.done ? ' done' : '');
+    li.innerHTML = `
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${i})">
+      <span>${t.text}</span>
+      <span class="row-del" onclick="removeTask(${i})">✕</span>
+    `;
+    list.appendChild(li);
+  });
+  const left = state.tasks.filter(t=>!t.done).length;
+  document.getElementById('statTasksLeft').textContent = left;
+  document.getElementById('statTasksHint').textContent = 'sur '+state.tasks.length+' au total';
+}
+
+render();
+</script>
+</body>
+</html>
