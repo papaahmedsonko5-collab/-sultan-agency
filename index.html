@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050505">
+<title>Sultan Agency — On crée des moments</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --black:#050505;
+  --black2:#0D0D0D;
+  --black3:#161616;
+  --gold:#C9A84C;
+  --gold2:#E8C96A;
+  --gold3:#F5E0A0;
+  --gold-dim:rgba(201,168,76,0.12);
+  --grey:#888;
+  --white:#FAFAF8;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor{
+  position:fixed;width:10px;height:10px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,opacity .2s;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(201,168,76,0.5);border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:all .12s ease;
+}
+body:hover .cursor{opacity:1}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:22px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(180deg,rgba(5,5,5,0.95) 0%,transparent 100%);
+  backdrop-filter:blur(2px);
+}
+.nav-logo{
+  font-family:'Playfair Display',serif;
+  font-size:18px;font-weight:700;
+  letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;
+  text-decoration:none;
+}
+.nav-links{
+  display:flex;gap:36px;list-style:none;
+}
+.nav-links a{
+  font-size:10px;font-weight:400;
+  letter-spacing:3px;text-transform:uppercase;
+  color:rgba(250,250,248,0.45);
+  text-decoration:none;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--gold)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  padding:0 48px;
+}
+
+/* animated grain overlay */
+.hero::before{
+  content:'';position:absolute;inset:-50%;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  animation:grain 0.5s steps(2) infinite;
+  opacity:0.4;pointer-events:none;z-index:1;
+}
+@keyframes grain{
+  0%,100%{transform:translate(0,0)}
+  10%{transform:translate(-2%,-3%)}
+  30%{transform:translate(3%,-1%)}
+  50%{transform:translate(-1%,2%)}
+  70%{transform:translate(2%,3%)}
+  90%{transform:translate(-3%,1%)}
+}
+
+/* radial glow */
+.hero-glow{
+  position:absolute;
+  width:600px;height:600px;
+  background:radial-gradient(ellipse,rgba(201,168,76,0.08) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;z-index:0;
+  animation:pulse 4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+}
+
+/* big decorative number */
+.hero-number{
+  position:absolute;right:-40px;top:50%;transform:translateY(-50%);
+  font-family:'Playfair Display',serif;
+  font-size:320px;font-weight:900;
+  color:rgba(201,168,76,0.04);
+  line-height:1;pointer-events:none;
+  user-select:none;z-index:0;
+  letter-spacing:-20px;
+}
+
+.hero-content{
+  position:relative;z-index:2;
+  max-width:900px;text-align:center;
+}
+
+.hero-eyebrow{
+  font-size:9px;font-weight:400;
+  letter-spacing:6px;text-transform:uppercase;
+  color:var(--gold);opacity:0.8;
+  margin-bottom:28px;
+  animation:fadeUp 1s ease both;
+}
+
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(52px,8vw,96px);
+  font-weight:900;line-height:0.95;
+  margin-bottom:10px;
+  animation:fadeUp 1s ease 0.1s both;
+}
+
+.hero-title .line1{color:var(--white)}
+.hero-title .line2{
+  font-style:italic;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  font-size:13px;font-weight:300;
+  letter-spacing:2px;
+  color:rgba(250,250,248,0.4);
+  margin:24px 0 48px;
+  animation:fadeUp 1s ease 0.2s both;
+}
+
+.hero-cta{
+  display:inline-flex;align-items:center;gap:12px;
+  animation:fadeUp 1s ease 0.3s both;
+}
+
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;
+  background:var(--gold);
+  color:var(--black);
+  font-size:9px;font-weight:500;
+  letter-spacing:4px;text-transform:uppercase;
+  text-decoration:none;
+  transition:all .25s;
+  border:none;cursor:none;
+}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-2px)}
+
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;
+  background:transparent;
+  color:var(--white);
+  font-size:9px;font-weight:400;
+  letter-spacing:4px;text-transform:uppercase;
+  text-decoration:none;
+  border:1px solid rgba(250,250,248,0.15);
+  transition:all .25s;cursor:none;
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* scrolling ticker */
+.ticker{
+  position:absolute;bottom:0;left:0;right:0;
+  border-top:1px solid rgba(201,168,76,0.1);
+  padding:14px 0;overflow:hidden;
+  background:rgba(5,5,5,0.8);
+  backdrop-filter:blur(10px);
+  z-index:2;
+}
+.ticker-inner{
+  display:flex;gap:0;
+  animation:ticker 20s linear infinite;
+  white-space:nowrap;
+}
+.ticker-item{
+  flex-shrink:0;
+  font-size:8px;font-weight:400;
+  letter-spacing:4px;text-transform:uppercase;
+  color:rgba(201,168,76,0.5);
+  padding:0 32px;
+}
+.ticker-dot{color:var(--gold);margin:0 8px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── MARQUEE LINE ── */
+.marquee-section{
+  padding:32px 0;
+  border-top:1px solid rgba(201,168,76,0.08);
+  border-bottom:1px solid rgba(201,168,76,0.08);
+  overflow:hidden;
+  background:var(--black2);
+}
+.marquee-track{
+  display:flex;
+  animation:marquee 18s linear infinite;
+  white-space:nowrap;
+}
+.marquee-item{
+  flex-shrink:0;
+  font-family:'Playfair Display',serif;
+  font-size:42px;font-weight:700;font-style:italic;
+  color:rgba(201,168,76,0.07);
+  padding:0 48px;letter-spacing:2px;
+  user-select:none;
+}
+.marquee-item.accent{color:rgba(201,168,76,0.18)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── ABOUT ── */
+.about{
+  padding:120px 48px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:center;
+  max-width:1200px;margin:0 auto;
+}
+.about-left{}
+.about-tag{
+  font-size:8px;font-weight:400;
+  letter-spacing:5px;text-transform:uppercase;
+  color:var(--gold);opacity:0.7;
+  margin-bottom:20px;
+}
+.about-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:700;line-height:1.1;
+  margin-bottom:24px;
+}
+.about-title em{font-style:italic;color:var(--gold2)}
+.about-body{
+  font-size:13px;font-weight:300;
+  color:rgba(250,250,248,0.55);
+  line-height:1.9;margin-bottom:32px;
+}
+.about-stats{
+  display:flex;gap:40px;
+  padding-top:32px;
+  border-top:1px solid rgba(201,168,76,0.1);
+}
+.stat-num{
+  font-family:'Playfair Display',serif;
+  font-size:36px;font-weight:700;
+  color:var(--gold);line-height:1;
+  margin-bottom:4px;
+}
+.stat-label{
+  font-size:9px;font-weight:300;
+  letter-spacing:2px;text-transform:uppercase;
+  color:rgba(250,250,248,0.35);
+}
+
+.about-right{
+  position:relative;
+}
+.about-visual{
+  width:100%;aspect-ratio:3/4;
+  background:var(--black3);
+  border:1px solid rgba(201,168,76,0.1);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.about-visual-inner{
+  font-family:'Playfair Display',serif;
+  font-size:100px;font-weight:900;font-style:italic;
+  color:rgba(201,168,76,0.08);
+  user-select:none;
+}
+.about-visual::before{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:40%;
+  background:linear-gradient(0deg,var(--black3),transparent);
+}
+.about-visual-tag{
+  position:absolute;bottom:24px;left:24px;right:24px;
+  font-size:9px;font-weight:400;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);opacity:0.7;
+}
+.about-accent{
+  position:absolute;top:-20px;right:-20px;
+  width:120px;height:120px;
+  border:1px solid rgba(201,168,76,0.15);
+  z-index:-1;
+}
+
+/* ── SERVICES ── */
+.services{
+  padding:80px 48px 120px;
+  max-width:1200px;margin:0 auto;
+}
+.section-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:60px;
+  padding-bottom:24px;
+  border-bottom:1px solid rgba(201,168,76,0.1);
+}
+.section-tag{
+  font-size:8px;font-weight:400;
+  letter-spacing:5px;text-transform:uppercase;
+  color:var(--gold);opacity:0.7;
+  margin-bottom:12px;
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,4vw,44px);
+  font-weight:700;line-height:1.1;
+}
+.section-title em{font-style:italic;color:var(--gold2)}
+
+.services-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:rgba(201,168,76,0.08);
+}
+.service-card{
+  background:var(--black2);
+  padding:36px 28px;
+  position:relative;overflow:hidden;
+  transition:background .3s;
+  cursor:none;
+}
+.service-card:hover{background:var(--black3)}
+.service-card::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s ease;
+}
+.service-card:hover::after{transform:scaleX(1)}
+.service-num{
+  font-family:'Playfair Display',serif;
+  font-size:48px;font-weight:900;
+  color:rgba(201,168,76,0.06);
+  line-height:1;margin-bottom:20px;
+}
+.service-icon{font-size:22px;margin-bottom:14px}
+.service-name{
+  font-size:12px;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--white);margin-bottom:10px;
+}
+.service-desc{
+  font-size:11px;font-weight:300;
+  color:rgba(250,250,248,0.4);
+  line-height:1.7;
+}
+
+/* ── CONCEPTS ── */
+.concepts{
+  padding:0 48px 120px;
+  max-width:1200px;margin:0 auto;
+}
+.concepts-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  margin-top:0;
+}
+.concept-card{
+  border:1px solid rgba(201,168,76,0.1);
+  padding:40px 32px;
+  position:relative;
+  transition:border-color .3s,transform .3s;
+  cursor:none;
+}
+.concept-card:hover{
+  border-color:rgba(201,168,76,0.3);
+  transform:translateY(-4px);
+}
+.concept-num{
+  position:absolute;top:20px;right:24px;
+  font-family:'Playfair Display',serif;
+  font-size:64px;font-weight:900;
+  color:rgba(201,168,76,0.04);
+  line-height:1;user-select:none;
+}
+.concept-name{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:700;font-style:italic;
+  color:var(--gold2);margin-bottom:10px;
+}
+.concept-tagline{
+  font-size:10px;font-weight:400;
+  letter-spacing:2px;text-transform:uppercase;
+  color:rgba(250,250,248,0.3);
+  margin-bottom:14px;
+}
+.concept-desc{
+  font-size:12px;font-weight:300;
+  color:rgba(250,250,248,0.5);
+  line-height:1.7;
+}
+
+/* ── VALUES ── */
+.values{
+  background:var(--black2);
+  padding:100px 48px;
+  border-top:1px solid rgba(201,168,76,0.08);
+  border-bottom:1px solid rgba(201,168,76,0.08);
+}
+.values-inner{max-width:1200px;margin:0 auto}
+.values-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:40px;
+  margin-top:60px;
+}
+.value-item{}
+.value-icon{
+  font-size:28px;margin-bottom:16px;
+}
+.value-name{
+  font-family:'Playfair Display',serif;
+  font-size:18px;font-weight:700;
+  color:var(--white);margin-bottom:8px;
+}
+.value-desc{
+  font-size:11px;font-weight:300;
+  color:rgba(250,250,248,0.4);
+  line-height:1.7;
+}
+
+/* ── CONTACT ── */
+.contact{
+  padding:120px 48px;
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:start;
+}
+.contact-left{}
+.contact-intro{
+  font-size:13px;font-weight:300;
+  color:rgba(250,250,248,0.5);
+  line-height:1.9;margin-bottom:40px;
+}
+.contact-links{display:flex;flex-direction:column;gap:12px}
+.contact-link{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 20px;
+  background:var(--black2);
+  border:1px solid rgba(201,168,76,0.08);
+  text-decoration:none;
+  transition:border-color .2s,background .2s;
+  cursor:none;
+}
+.contact-link:hover{
+  border-color:rgba(201,168,76,0.25);
+  background:var(--black3);
+}
+.contact-link-icon{
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(201,168,76,0.08);
+  border-radius:50%;font-size:14px;flex-shrink:0;
+}
+.contact-link-text{flex:1}
+.contact-link-label{
+  font-size:9px;font-weight:400;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);opacity:0.7;
+  margin-bottom:3px;
+}
+.contact-link-value{
+  font-size:12px;font-weight:300;
+  color:rgba(250,250,248,0.6);
+}
+.contact-link-arrow{
+  color:rgba(201,168,76,0.4);font-size:16px;
+}
+
+.contact-right{
+  padding:48px;
+  background:var(--black2);
+  border:1px solid rgba(201,168,76,0.1);
+  text-align:center;
+}
+.contact-right-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:700;font-style:italic;
+  color:var(--white);margin-bottom:8px;
+}
+.contact-right-sub{
+  font-size:10px;font-weight:300;
+  letter-spacing:3px;text-transform:uppercase;
+  color:rgba(250,250,248,0.3);
+  margin-bottom:32px;
+}
+.contact-right-tagline{
+  font-family:'Playfair Display',serif;
+  font-size:16px;font-style:italic;
+  color:rgba(201,168,76,0.6);
+  line-height:1.7;
+  padding:24px 0;
+  border-top:1px solid rgba(201,168,76,0.1);
+  border-bottom:1px solid rgba(201,168,76,0.1);
+  margin-bottom:32px;
+}
+.contact-right-tagline span{color:var(--gold2);font-style:normal}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid rgba(201,168,76,0.1);
+  padding:40px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--black);
+}
+.footer-logo{
+  font-family:'Playfair Display',serif;
+  font-size:14px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);
+}
+.footer-copy{
+  font-size:9px;font-weight:300;
+  letter-spacing:2px;
+  color:rgba(250,250,248,0.2);
+}
+.footer-flag{font-size:16px}
+
+/* ── SCROLL REVEAL ── */
+.reveal{
+  opacity:0;transform:translateY(40px);
+  transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:18px 24px}
+  .nav-links{display:none}
+  .hero{padding:0 24px}
+  .hero-number{display:none}
+  .about{grid-template-columns:1fr;padding:80px 24px;gap:40px}
+  .about-right{display:none}
+  .services{padding:60px 24px 80px}
+  .services-grid{grid-template-columns:1fr 1fr}
+  .concepts{padding:0 24px 80px}
+  .concepts-grid{grid-template-columns:1fr}
+  .values{padding:60px 24px}
+  .values-grid{grid-template-columns:1fr 1fr;gap:24px}
+  .contact{grid-template-columns:1fr;padding:80px 24px;gap:40px}
+  footer{padding:28px 24px;flex-direction:column;gap:12px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Sultan Agency</a>
+  <ul class="nav-links">
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#concepts">Concepts</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="hero-number">SA</div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">✦ &nbsp; Agence créative & événementielle &nbsp; ✦</div>
+    <h1 class="hero-title">
+      <div class="line1">On ne fait pas</div>
+      <div class="line2">des événements.</div>
+    </h1>
+    <p class="hero-sub">On crée des moments qui marquent, connectent et inspirent &nbsp;·&nbsp; Dakar 🇸🇳</p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">Nous contacter →</a>
+      <a href="#services" class="btn-ghost">Nos services</a>
+    </div>
+  </div>
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span class="ticker-item">Événementiel <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Artist Management <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Production <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Expériences Premium <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Culture <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Lifestyle <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Dakar Sénégal <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Événementiel <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Artist Management <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Production <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Expériences Premium <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Culture <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Lifestyle <span class="ticker-dot">✦</span></span>
+      <span class="ticker-item">Dakar Sénégal <span class="ticker-dot">✦</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Sultan Agency</span>
+    <span class="marquee-item accent">Moments</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">Dakar</span>
+    <span class="marquee-item">Expériences</span>
+    <span class="marquee-item accent">Premium</span>
+    <span class="marquee-item">Sultan Agency</span>
+    <span class="marquee-item accent">Moments</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">Dakar</span>
+    <span class="marquee-item">Expériences</span>
+    <span class="marquee-item accent">Premium</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-left">
+    <div class="about-tag reveal">— Qui sommes-nous —</div>
+    <h2 class="about-title reveal reveal-delay-1">Une nouvelle vision<br>de <em>l'événementiel</em></h2>
+    <p class="about-body reveal reveal-delay-2">
+      Sultan Agency est une agence créative basée à Dakar, spécialisée dans la conception d'expériences culturelles, artistiques et événementielles. À la croisée de la musique, du lifestyle et du business, nous développons une vision moderne et immersive de l'événementiel au Sénégal.
+    </p>
+    <p class="about-body reveal reveal-delay-2">
+      Nous ne créons pas simplement des événements. Nous concevons des moments qui marquent, connectent et inspirent.
+    </p>
+    <div class="about-stats reveal reveal-delay-3">
+      <div>
+        <div class="stat-num">4</div>
+        <div class="stat-label">Pôles d'activité</div>
+      </div>
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Concepts signatures</div>
+      </div>
+      <div>
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Moments créés</div>
+      </div>
+    </div>
+    <div class="reveal reveal-delay-3" style="margin-top:32px">
+      <a href="https://www.instagram.com/sultan.experiences" target="_blank" class="btn-primary">
+        📸 Voir nos réalisations →
+      </a>
+    </div>
+  </div>
+  <div class="about-right reveal reveal-delay-2">
+    <div class="about-accent"></div>
+    <div class="about-visual">
+      <div class="about-visual-inner">SA</div>
+      <div class="about-visual-tag">Sultan Agency — Dakar 🇸🇳</div>
+    </div>
+  </div>
+</section>
+
+<!-- FONDATEUR -->
+<section style="padding:100px 48px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;gap:80px;flex-wrap:wrap;">
+  <div class="reveal" style="flex:0 0 300px;">
+    <img src="https://i.ibb.co/fVG87CR5/IMG-9345.jpg" alt="Papa Ahmed Sonko" style="width:300px;height:380px;object-fit:cover;object-position:top;filter:grayscale(10%);border:1px solid rgba(201,168,76,0.2);">
+  </div>
+  <div class="reveal reveal-delay-1" style="flex:1;min-width:280px;max-width:520px;">
+    <div style="font-size:9px;letter-spacing:6px;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">— Le Fondateur —</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:24px;">Papa Ahmed <em style="color:#C9A84C;">Sonko</em></h2>
+    <p style="font-size:14px;font-weight:300;line-height:1.8;color:rgba(250,250,248,0.7);margin-bottom:16px;">
+      À 20 ans, j'avais un badge vidéaste dans un festival de banlieue. Je filmais. J'observais. J'apprenais.
+    </p>
+    <p style="font-size:14px;font-weight:300;line-height:1.8;color:rgba(250,250,248,0.7);margin-bottom:16px;">
+      Après, j'ai traversé des scènes, des hôtels, des soirées privées, des restos. Tantôt vidéaste, tantôt manager, tantôt organisateur. Toujours en mouvement.
+    </p>
+    <p style="font-size:14px;font-weight:300;line-height:1.8;color:rgba(250,250,248,0.7);margin-bottom:32px;">
+      Un soir, j'ai organisé mon propre Bercy — ici, à Dakar. Avec mes artistes, mon équipe, ma vision. C'est de là qu'est née Sultan Agency.
+    </p>
+    <a href="https://www.instagram.com/sultan.ex" target="_blank" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:#C9A84C;color:#050505;font-size:9px;font-weight:500;letter-spacing:4px;text-transform:uppercase;text-decoration:none;">
+      Me suivre →
+    </a>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-tag">— Ce que nous faisons —</div>
+      <h2 class="section-title">Nos <em>services</em></h2>
+    </div>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <div class="service-icon">🎭</div>
+      <div class="service-name">Événementiel</div>
+      <div class="service-desc">Soirées privées, afterworks, excursions et événements sur mesure conçus pour marquer les esprits.</div>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">02</div>
+      <div class="service-icon">🎤</div>
+      <div class="service-name">Artist Management</div>
+      <div class="service-desc">Développement d'artistes émergents, gestion d'image et de carrière, booking & performances.</div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">03</div>
+      <div class="service-icon">🎬</div>
+      <div class="service-name">Production & Contenu</div>
+      <div class="service-desc">Recap d'événements, storytelling visuel et création de contenu digital percutant.</div>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">04</div>
+      <div class="service-icon">✨</div>
+      <div class="service-name">Expériences sur mesure</div>
+      <div class="service-desc">Activation de marque, événements corporate et collaborations stratégiques premium.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCEPTS -->
+<section class="concepts" id="concepts">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-tag">— Nos formats uniques —</div>
+      <h2 class="section-title">Concepts <em>signatures</em></h2>
+    </div>
+  </div>
+  <div class="concepts-grid">
+    <div class="concept-card reveal">
+      <div class="concept-num">01</div>
+      <div class="concept-name">Sing Sing</div>
+      <div class="concept-tagline">Live band + ambiance immersive</div>
+      <div class="concept-desc">Une expérience musicale vivante et authentique. La musique comme vous ne l'avez jamais vécue.</div>
+    </div>
+    <div class="concept-card reveal reveal-delay-1">
+      <div class="concept-num">02</div>
+      <div class="concept-name">Afterwork Signature</div>
+      <div class="concept-tagline">Networking + musique + premium</div>
+      <div class="concept-desc">Un mélange parfait entre business et lifestyle. Là où les connexions se font naturellement.</div>
+    </div>
+    <div class="concept-card reveal reveal-delay-2">
+      <div class="concept-num">03</div>
+      <div class="concept-name">Excursions</div>
+      <div class="concept-tagline">Chill + communauté + contenu</div>
+      <div class="concept-desc">Des moments de connexion hors de la ville. La communauté Sultan au-delà des murs.</div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values">
+  <div class="values-inner">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-tag">— Ce qui nous guide —</div>
+        <h2 class="section-title">Nos <em>valeurs</em></h2>
+      </div>
+    </div>
+    <div class="values-grid">
+      <div class="value-item reveal">
+        <div class="value-icon">💡</div>
+        <div class="value-name">Créativité</div>
+        <div class="value-desc">Proposer des concepts originaux qui sortent de l'ordinaire à chaque fois.</div>
+      </div>
+      <div class="value-item reveal reveal-delay-1">
+        <div class="value-icon">🎯</div>
+        <div class="value-name">Expérience</div>
+        <div class="value-desc">Faire ressentir, pas juste organiser. Chaque détail compte.</div>
+      </div>
+      <div class="value-item reveal reveal-delay-2">
+        <div class="value-icon">⚡</div>
+        <div class="value-name">Exigence</div>
+        <div class="value-desc">Viser la qualité absolue à chaque détail de chaque projet.</div>
+      </div>
+      <div class="value-item reveal reveal-delay-3">
+        <div class="value-icon">🔭</div>
+        <div class="value-name">Vision</div>
+        <div class="value-desc">Construire l'événementiel de demain au Sénégal et en Afrique.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-left">
+    <div class="section-tag reveal">— Travaillons ensemble —</div>
+    <h2 class="section-title reveal reveal-delay-1" style="margin-bottom:24px">Nous <em>contacter</em></h2>
+    <p class="contact-intro reveal reveal-delay-2">
+      Tu as un projet, un événement à organiser, une marque à activer ou simplement envie d'échanger ? On est là.
+    </p>
+    <div class="contact-links">
+      <a href="https://wa.me/221781482035" class="contact-link reveal reveal-delay-1">
+        <div class="contact-link-icon">📱</div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">WhatsApp</div>
+          <div class="contact-link-value">+221 78 148 20 35</div>
+        </div>
+        <div class="contact-link-arrow">›</div>
+      </a>
+      <a href="https://www.instagram.com/sultan.experiences?igsh=MXVnbWdheHo3bGpzbA%3D%3D" target="_blank" class="contact-link reveal reveal-delay-2">
+        <div class="contact-link-icon">📸</div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">Instagram</div>
+          <div class="contact-link-value">@sultan.experiences</div>
+        </div>
+        <div class="contact-link-arrow">›</div>
+      </a>
+      <a href="https://www.snapchat.com/add/sultanthebest29" target="_blank" class="contact-link reveal reveal-delay-3">
+        <div class="contact-link-icon">👻</div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">Snapchat</div>
+          <div class="contact-link-value">sultanthebest29</div>
+        </div>
+        <div class="contact-link-arrow">›</div>
+      </a>
+      <a href="mailto:papaahmedsonko5@gmail.com" class="contact-link reveal reveal-delay-4">
+        <div class="contact-link-icon">✉️</div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">Email</div>
+          <div class="contact-link-value">papaahmedsonko5@gmail.com</div>
+        </div>
+        <div class="contact-link-arrow">›</div>
+      </a>
+    </div>
+  </div>
+  <div class="contact-right reveal reveal-delay-2">
+    <div class="contact-right-title">Sultan Agency</div>
+    <div class="contact-right-sub">Dakar, Sénégal 🇸🇳</div>
+    <div class="contact-right-tagline">
+      "On ne fait pas des événements.<br><span>On crée des moments."</span>
+    </div>
+    <a href="https://wa.me/221781482035" class="btn-primary" style="width:100%;justify-content:center">
+      Démarrer un projet →
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Sultan Agency</div>
+  <div class="footer-copy">© 2025 Sultan Agency — Tous droits réservés</div>
+  <div class="footer-flag">🇸🇳</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animateRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Hover effect on interactive elements
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.width='6px';cursor.style.height='6px';
+    ring.style.width='52px';ring.style.height='52px';
+    ring.style.borderColor='rgba(201,168,76,0.8)';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cursor.style.width='10px';cursor.style.height='10px';
+    ring.style.width='36px';ring.style.height='36px';
+    ring.style.borderColor='rgba(201,168,76,0.5)';
+  });
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible')}
+  });
+},{threshold:0.1});
+reveals.forEach(r=>observer.observe(r));
+</script>
+</body>
+</html>
