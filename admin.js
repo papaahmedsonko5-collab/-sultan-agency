@@ -15,6 +15,7 @@
   var leads = [];
   var selectedLeadId = null;
   var pendingLead = null;
+  var lastOwnOrderId = null;
   var leadError = '';
   var lf = { status: '', q: '' };
   var channel = null;
@@ -148,10 +149,12 @@
   });
 
   /* ---------- Données ---------- */
-  function loadOrders() {
+  function loadOrders(silent) {
     loadError = '';
-    $('#list').textContent = '';
-    $('#list').appendChild(el('p', 'state', 'Chargement...'));
+    if (silent !== true) {
+      $('#list').textContent = '';
+      $('#list').appendChild(el('p', 'state', 'Chargement...'));
+    }
     sb.from('orders').select('*')
       .order('ordered_on', { ascending: false })
       .order('created_at', { ascending: false })
@@ -239,7 +242,7 @@
       root.appendChild(el('p', 'state', loadError));
       var retry = el('button', 'btn btn-ghost btn-sm', 'Réessayer');
       retry.type = 'button'; retry.style.margin = '0 18px 18px';
-      retry.addEventListener('click', loadOrders);
+      retry.addEventListener('click', function () { loadOrders(); });
       root.appendChild(retry);
       return;
     }
@@ -363,6 +366,7 @@
       dlg.close();
       toast(editingId ? 'Commande modifiée' : 'Commande ajoutée');
       selectedId = res.data.id;
+      lastOwnOrderId = res.data.id;
       var from = pendingLead;
       pendingLead = null;
       if (from && !editingId) {
@@ -803,15 +807,33 @@
   /* ---------- Alertes en direct ---------- */
   function subscribeLeads() {
     if (channel || !sb.channel) return;
-    channel = sb.channel('leads-live')
+    channel = sb.channel('live')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, function (payload) {
         var l = payload.new || {};
         toast('Nouvelle demande de ' + (l.name || 'un visiteur'));
         browserAlert(l);
         loadLeads();
       })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'leads' }, function () { loadLeads(); })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'leads' }, function () { loadLeads(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, function (payload) {
+        if (payload.eventType === 'INSERT') {
+          var o = payload.new || {};
+          if (o.id !== lastOwnOrderId) toast('Nouvelle commande : ' + (o.client_name || '') + ' (' + money(o.amount || 0) + ')');
+        }
+        loadOrders(true);
+      })
       .subscribe();
   }
+
+  /* Filet de sécurité : rafraîchit aussi quand on revient sur la page et toutes les 30 secondes */
+  function refreshAll() {
+    if (!userId || document.hidden) return;
+    loadOrders(true);
+    loadLeads();
+  }
+  document.addEventListener('visibilitychange', refreshAll);
+  setInterval(refreshAll, 30000);
 
   function browserAlert(l) {
     try {
