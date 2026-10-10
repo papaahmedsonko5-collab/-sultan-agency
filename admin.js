@@ -12,6 +12,12 @@
   var userId = null;
   var filters = { status: '', period: 'all', q: '' };
   var loadError = '';
+  var leads = [];
+  var selectedLeadId = null;
+  var pendingLead = null;
+  var leadError = '';
+  var lf = { status: '', q: '' };
+  var LSTATUS = { nouveau: 'Nouveau', contacte: 'Contacté', devis_envoye: 'Devis envoyé', gagne: 'Gagné', perdu: 'Perdu' };
 
   function $(s) { return document.querySelector(s); }
   function el(tag, cls, text) {
@@ -59,6 +65,7 @@
       $('#who').textContent = session.user.email || '';
       show('app');
       loadOrders();
+      loadLeads();
     });
   }
 
@@ -288,8 +295,9 @@
 
   /* ---------- Formulaire ---------- */
   var dlg = $('#dlg');
-  function openForm(o) {
+  function openForm(o, lead) {
     editingId = o ? o.id : null;
+    pendingLead = lead || null;
     $('#dlg-title').textContent = o ? 'Modifier la commande' : 'Nouvelle commande';
     $('#o-client').value = o ? o.client_name : '';
     $('#o-project').value = o ? o.project_title : '';
@@ -301,6 +309,15 @@
     $('#o-paid').value = o ? o.paid : 0;
     $('#o-date').value = o ? o.ordered_on : isoDate(new Date());
     $('#o-notes').value = o && o.notes ? o.notes : '';
+    if (lead) {
+      $('#dlg-title').textContent = 'Transformer en commande';
+      $('#o-client').value = lead.name;
+      var opts = Array.prototype.map.call($('#o-service').options, function (x) { return x.value; });
+      $('#o-service').value = opts.indexOf(lead.service) !== -1 ? lead.service : 'Autre';
+      $('#o-project').value = (lead.service && opts.indexOf(lead.service) !== -1 ? lead.service + ' pour ' : 'Projet pour ') + lead.name;
+      $('#o-status').value = 'en_cours';
+      $('#o-notes').value = lead.message || '';
+    }
     $('#order-msg').textContent = '';
     dlg.showModal();
     $('#o-client').focus();
@@ -339,6 +356,11 @@
       dlg.close();
       toast(editingId ? 'Commande modifiée' : 'Commande ajoutée');
       selectedId = res.data.id;
+      var from = pendingLead;
+      pendingLead = null;
+      if (from && !editingId) {
+        sb.from('leads').update({ status: 'gagne', order_id: res.data.id }).eq('id', from.id).then(function () { loadLeads(); });
+      }
       loadOrders();
     });
   });
@@ -357,6 +379,143 @@
   $('#f-status').addEventListener('change', function (e) { filters.status = e.target.value; render(); });
   $('#f-period').addEventListener('change', function (e) { filters.period = e.target.value; render(); });
   $('#f-q').addEventListener('input', function (e) { filters.q = e.target.value; render(); });
+
+  /* ---------- Demandes de devis ---------- */
+  function loadLeads() {
+    leadError = '';
+    sb.from('leads').select('*').order('created_at', { ascending: false }).then(function (res) {
+      if (res.error) { leadError = 'Impossible de charger les demandes. Vérifiez que le SQL des demandes a été exécuté.'; leads = []; }
+      else leads = res.data || [];
+      renderLeads();
+    });
+  }
+
+  function leadsFiltered() {
+    var q = lf.q.trim().toLowerCase();
+    return leads.filter(function (l) {
+      if (lf.status && l.status !== lf.status) return false;
+      if (q && (l.name + ' ' + (l.message || '')).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  function phoneToWa(phone) {
+    var d = String(phone || '').replace(/\D/g, '');
+    if (d.indexOf('00') === 0) d = d.slice(2);
+    if (d.length === 9 && d.charAt(0) === '7') d = '221' + d;
+    return d.length >= 10 ? d : null;
+  }
+
+  function fmtDateTime(iso) {
+    var d = new Date(iso);
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function renderLeads() {
+    var news = leads.filter(function (l) { return l.status === 'nouveau'; }).length;
+    var c = $('#leads-count');
+    c.textContent = String(news);
+    c.hidden = news === 0;
+
+    var list = leadsFiltered();
+    if (!list.some(function (l) { return l.id === selectedLeadId; })) selectedLeadId = list.length ? list[0].id : null;
+
+    var root = $('#llist');
+    root.textContent = '';
+    if (leadError) {
+      root.appendChild(el('p', 'state', leadError));
+      var retry = el('button', 'btn btn-ghost btn-sm', 'Réessayer');
+      retry.type = 'button'; retry.style.margin = '0 18px 18px';
+      retry.addEventListener('click', loadLeads);
+      root.appendChild(retry);
+    } else if (!list.length) {
+      root.appendChild(el('p', 'state', leads.length ? 'Aucune demande ne correspond à ces filtres.' : 'Aucune demande pour le moment. Elles apparaîtront ici dès qu\'un visiteur remplira le formulaire du site.'));
+    } else {
+      list.forEach(function (l) {
+        var b = el('button', 'order');
+        b.type = 'button';
+        b.setAttribute('aria-pressed', String(l.id === selectedLeadId));
+        b.appendChild(el('b', null, l.name));
+        b.appendChild(el('span', 'amt', fmtDateTime(l.created_at).slice(0, 10)));
+        b.appendChild(el('small', null, l.service || 'Type non précisé'));
+        var badge = el('span', 'badge ' + l.status, LSTATUS[l.status] || l.status);
+        badge.style.justifySelf = 'end';
+        b.appendChild(badge);
+        b.addEventListener('click', function () { selectedLeadId = l.id; renderLeads(); });
+        root.appendChild(b);
+      });
+    }
+
+    var p = $('#ldetail');
+    p.textContent = '';
+    var l = leads.filter(function (x) { return x.id === selectedLeadId; })[0];
+    if (!l) { p.appendChild(el('p', 'state', 'Sélectionnez une demande pour voir son détail.')); return; }
+    var box = el('div', 'detail');
+    box.appendChild(el('h2', null, l.name));
+    box.appendChild(el('p', 'mute', 'Reçue le ' + fmtDateTime(l.created_at)));
+    var dl = el('dl');
+    function row(k, v) { var d = el('div'); d.appendChild(el('dt', null, k)); d.appendChild(el('dd', null, v)); dl.appendChild(d); }
+    row('Téléphone', l.phone || 'Non renseigné');
+    row('Type de site', l.service || 'Non précisé');
+    box.appendChild(dl);
+    box.appendChild(el('p', 'msgbox', l.message));
+
+    var sr = el('div', 'statusrow');
+    var lab = el('label', null, 'Statut');
+    lab.setAttribute('for', 'lead-status');
+    var sel = el('select'); sel.id = 'lead-status';
+    Object.keys(LSTATUS).forEach(function (k) { var o = el('option', null, LSTATUS[k]); o.value = k; sel.appendChild(o); });
+    sel.value = l.status;
+    sel.addEventListener('change', function () {
+      sb.from('leads').update({ status: sel.value }).eq('id', l.id).then(function (res) {
+        if (res.error) { toast('Changement impossible', true); sel.value = l.status; return; }
+        toast('Statut mis à jour');
+        loadLeads();
+      });
+    });
+    sr.appendChild(lab); sr.appendChild(sel);
+    box.appendChild(sr);
+
+    var act = el('div', 'actions');
+    var wa = phoneToWa(l.phone);
+    if (wa) {
+      var a = el('a', 'btn btn-ghost btn-sm', 'Écrire sur WhatsApp');
+      a.href = 'https://wa.me/' + wa; a.target = '_blank'; a.rel = 'noopener';
+      act.appendChild(a);
+    }
+    if (!l.order_id) {
+      var conv = el('button', 'btn btn-primary btn-sm', 'Transformer en commande'); conv.type = 'button';
+      conv.addEventListener('click', function () { openForm(null, l); });
+      act.appendChild(conv);
+    } else {
+      act.appendChild(el('span', 'badge gagne', 'Déjà transformée en commande'));
+    }
+    var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
+    del.addEventListener('click', function () {
+      if (!window.confirm('Supprimer la demande de « ' + l.name + ' » ? Cette action est définitive.')) return;
+      sb.from('leads').delete().eq('id', l.id).then(function (res) {
+        if (res.error) { toast('Suppression impossible', true); return; }
+        toast('Demande supprimée'); selectedLeadId = null; loadLeads();
+      });
+    });
+    act.appendChild(del);
+    box.appendChild(act);
+    p.appendChild(box);
+  }
+
+  $('#lf-status').addEventListener('change', function (e) { lf.status = e.target.value; renderLeads(); });
+  $('#lf-q').addEventListener('input', function (e) { lf.q = e.target.value; renderLeads(); });
+
+  /* ---------- Onglets ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () {
+      var which = t.getAttribute('data-tab');
+      ['orders', 'leads'].forEach(function (n) {
+        $('#tab-' + n).hidden = (n !== which);
+        $('#tab-btn-' + n).setAttribute('aria-selected', String(n === which));
+      });
+    });
+  });
 
   initAuth();
 })();

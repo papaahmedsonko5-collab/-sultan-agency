@@ -125,7 +125,20 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
-  /* Formulaire : prépare un message WhatsApp, rien n'est stocké */
+  /* Enregistre la demande dans la base (en plus de WhatsApp) */
+  function saveLead(lead) {
+    if (!D || !D.api || !D.api.url) return;
+    try {
+      fetch(D.api.url + '/rest/v1/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': D.api.key, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(lead),
+        keepalive: true
+      }).catch(function () { /* WhatsApp reste le canal de secours */ });
+    } catch (e) { /* ignoré */ }
+  }
+
+  /* Formulaire : enregistre la demande puis ouvre WhatsApp */
   function initForm() {
     var form = $('#quote-form');
     if (!form || !D) return;
@@ -143,15 +156,24 @@
 
       if (!name) { msg.textContent = 'Indiquez votre nom.'; form.elements.name.focus(); return; }
       if (!message) { msg.textContent = 'Décrivez votre projet en quelques lignes.'; form.elements.message.focus(); return; }
+      msg.style.color = '';
       msg.textContent = '';
 
       var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
         'Type de site : ' + planLabel + '.\n' +
         'Mon projet : ' + message +
         (phone ? '\nMon numéro : ' + phone : '');
+      var hp = form.elements.website;
+      if (hp && hp.value) return;
+
+      saveLead({ name: name, phone: phone || null, service: planLabel, message: message });
+
       var url = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
+      msg.style.color = '#7fcf9a';
+      msg.textContent = 'Demande envoyée. Finalisez-la dans WhatsApp.';
+      form.reset();
     });
   }
 

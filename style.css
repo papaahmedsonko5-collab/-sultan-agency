@@ -202,3 +202,6 @@ p{max-width:62ch}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
 }
+
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.form-hint a{color:var(--gold-2)}

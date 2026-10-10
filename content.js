@@ -2,6 +2,10 @@
    Phase C : ce fichier sera remplacé par les données Supabase.
    Les prix ne sont définis qu'ici. */
 window.SULTAN = {
+  api: {
+    url: 'https://vfobcgsabgkteixywsxw.supabase.co',
+    key: 'sb_publishable_pJrpnAe7bWEb5BOfQHXbmA__YUNWfYR'
+  },
   contact: {
     whatsapp: '221781482035',
     whatsappLabel: '+221 78 148 20 35',
