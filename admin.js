@@ -69,6 +69,8 @@
       show('app');
       loadOrders();
       loadLeads();
+      loadCrud('pricing');
+      loadCrud('projects');
       subscribeLeads();
       initNotifButton();
     });
@@ -512,11 +514,286 @@
   $('#lf-status').addEventListener('change', function (e) { lf.status = e.target.value; renderLeads(); });
   $('#lf-q').addEventListener('input', function (e) { lf.q = e.target.value; renderLeads(); });
 
+  /* ---------- Tarifs et réalisations ---------- */
+  var PSTATUS = { en_cours: 'Projet en cours', termine: 'Terminé' };
+  var CRUD = {
+    pricing: {
+      label: 'tarif',
+      fields: [
+        { k: 'name', label: 'Nom', type: 'text', req: true, max: 80 },
+        { k: 'slug', label: 'Identifiant (minuscules, chiffres et tirets)', type: 'text', req: true, pattern: /^[a-z0-9-]{2,40}$/, hint: 'Exemple : site-vitrine' },
+        { k: 'price', label: 'Prix de départ (FCFA)', type: 'int', req: true },
+        { k: 'price_label', label: 'Prix affiché (vide = calculé automatiquement)', type: 'text', max: 80 },
+        { k: 'badge', label: 'Badge (exemple : Populaire)', type: 'text', max: 30 },
+        { k: 'description', label: 'Description', type: 'textarea', max: 300 },
+        { k: 'sort_order', label: 'Ordre d\'affichage (1 = premier)', type: 'int', def: 0 },
+        { k: 'active', label: 'Visible sur le site', type: 'bool', def: true }
+      ],
+      describe: function (r) { return { title: r.name + (r.badge ? ' (' + r.badge + ')' : ''), sub: r.price_label || ('À partir de ' + money(r.price)), on: r.active }; },
+      onLabel: ['Visible', 'Masqué']
+    },
+    projects: {
+      label: 'réalisation',
+      fields: [
+        { k: 'title', label: 'Titre', type: 'text', req: true, max: 120 },
+        { k: 'category', label: 'Catégorie (exemple : E-commerce)', type: 'text', max: 60 },
+        { k: 'description', label: 'Description', type: 'textarea', max: 400 },
+        { k: 'status', label: 'Statut', type: 'select', options: PSTATUS, def: 'termine' },
+        { k: 'url', label: 'Adresse du site (https://...)', type: 'url' },
+        { k: 'image_url', label: 'Adresse d\'une image (https://...)', type: 'url' },
+        { k: 'sort_order', label: 'Ordre d\'affichage (1 = premier)', type: 'int', def: 0 },
+        { k: 'published', label: 'Publiée sur le site', type: 'bool', def: true }
+      ],
+      describe: function (r) { return { title: r.title, sub: [r.category, PSTATUS[r.status]].filter(Boolean).join(', '), on: r.published }; },
+      onLabel: ['Publiée', 'Masquée']
+    }
+  };
+  var crudRows = { pricing: [], projects: [] };
+  var crudErr = { pricing: '', projects: '' };
+  var crudEditing = { table: null, id: null };
+
+  function loadCrud(name) {
+    crudErr[name] = '';
+    sb.from(name).select('*').order('sort_order', { ascending: true }).then(function (res) {
+      if (res.error) { crudErr[name] = 'Impossible de charger cette liste. Vérifiez que le SQL des contenus a été exécuté.'; crudRows[name] = []; }
+      else crudRows[name] = res.data || [];
+      renderCrud(name);
+    });
+  }
+
+  function renderCrud(name) {
+    var root = $('#list-' + name);
+    root.textContent = '';
+    var cfg = CRUD[name];
+    if (crudErr[name]) {
+      root.appendChild(el('p', 'state', crudErr[name]));
+      var retry = el('button', 'btn btn-ghost btn-sm', 'Réessayer'); retry.type = 'button'; retry.style.margin = '0 18px 18px';
+      retry.addEventListener('click', function () { loadCrud(name); });
+      root.appendChild(retry);
+      return;
+    }
+    if (!crudRows[name].length) { root.appendChild(el('p', 'state', 'Rien pour le moment. Ajoutez le premier.')); return; }
+    crudRows[name].forEach(function (r) {
+      var d = cfg.describe(r);
+      var row = el('div', 'crow');
+      var info = el('div', 'info');
+      info.appendChild(el('b', null, d.title));
+      info.appendChild(el('small', null, d.sub));
+      row.appendChild(info);
+      var acts = el('div', 'acts');
+      acts.appendChild(el('span', 'badge ' + (d.on ? 'termine' : 'off'), d.on ? cfg.onLabel[0] : cfg.onLabel[1]));
+      var ed = el('button', 'btn btn-primary btn-sm', 'Modifier'); ed.type = 'button';
+      ed.addEventListener('click', function () { openCrud(name, r); });
+      var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
+      del.addEventListener('click', function () {
+        if (!window.confirm('Supprimer « ' + d.title + ' » ? Cette action est définitive.')) return;
+        sb.from(name).delete().eq('id', r.id).then(function (res) {
+          if (res.error) { toast('Suppression impossible', true); return; }
+          toast('Supprimé'); loadCrud(name);
+        });
+      });
+      acts.appendChild(ed); acts.appendChild(del);
+      row.appendChild(acts);
+      root.appendChild(row);
+    });
+  }
+
+  var dlgItem = $('#dlg-item');
+  function fid(k) { return 'cf-' + k; }
+
+  function openCrud(name, row) {
+    var cfg = CRUD[name];
+    crudEditing = { table: name, id: row ? row.id : null };
+    $('#ci-title').textContent = row ? 'Modifier : ' + cfg.label : 'Ajouter : ' + cfg.label;
+    var box = $('#ci-fields');
+    box.textContent = '';
+    cfg.fields.forEach(function (f) {
+      var val = row ? row[f.k] : f.def;
+      if (!row && f.k === 'sort_order') val = crudRows[name].reduce(function (m, r) { return Math.max(m, r.sort_order || 0); }, 0) + 1;
+      var wrap;
+      if (f.type === 'bool') {
+        wrap = el('div', 'chk');
+        var cb = el('input'); cb.type = 'checkbox'; cb.id = fid(f.k); cb.checked = !!val;
+        var lb = el('label', null, f.label); lb.setAttribute('for', cb.id);
+        wrap.appendChild(cb); wrap.appendChild(lb);
+      } else {
+        wrap = el('div', 'field');
+        var lab = el('label', null, f.label); lab.setAttribute('for', fid(f.k));
+        var inp;
+        if (f.type === 'textarea') { inp = el('textarea'); }
+        else if (f.type === 'select') {
+          inp = el('select');
+          Object.keys(f.options).forEach(function (k) { var o = el('option', null, f.options[k]); o.value = k; inp.appendChild(o); });
+        } else {
+          inp = el('input');
+          inp.type = f.type === 'int' ? 'number' : (f.type === 'url' ? 'url' : 'text');
+          if (f.type === 'int') { inp.min = '0'; inp.step = '1'; inp.inputMode = 'numeric'; }
+        }
+        inp.id = fid(f.k);
+        if (f.max) inp.maxLength = f.max;
+        inp.value = (val === null || val === undefined) ? '' : val;
+        wrap.appendChild(lab); wrap.appendChild(inp);
+        if (f.hint) { var hi = el('small', 'mute', f.hint); wrap.appendChild(hi); }
+      }
+      box.appendChild(wrap);
+    });
+    $('#ci-msg').textContent = '';
+    dlgItem.showModal();
+  }
+
+  $('#ci-cancel').addEventListener('click', function () { dlgItem.close(); });
+
+  $('#ci-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = crudEditing.table;
+    var cfg = CRUD[name];
+    var msg = $('#ci-msg');
+    var rec = {};
+    for (var i = 0; i < cfg.fields.length; i++) {
+      var f = cfg.fields[i];
+      var node = $('#' + fid(f.k));
+      var v;
+      if (f.type === 'bool') { rec[f.k] = node.checked; continue; }
+      v = node.value.trim();
+      if (!v) {
+        if (f.req) { msg.textContent = 'Renseignez : ' + f.label; node.focus(); return; }
+        rec[f.k] = (f.type === 'textarea' || f.type === 'select') ? (f.type === 'select' ? f.def : '') : null;
+        if (f.type === 'int') rec[f.k] = f.def !== undefined ? f.def : 0;
+        continue;
+      }
+      if (f.type === 'int') {
+        var n = parseInt(v, 10);
+        if (isNaN(n) || n < 0) { msg.textContent = 'Nombre positif attendu : ' + f.label; node.focus(); return; }
+        rec[f.k] = n;
+      } else if (f.type === 'url') {
+        if (!/^https?:\/\//i.test(v)) { msg.textContent = 'L\'adresse doit commencer par https://'; node.focus(); return; }
+        rec[f.k] = v;
+      } else {
+        if (f.pattern && !f.pattern.test(v)) { msg.textContent = 'Format invalide : ' + f.label; node.focus(); return; }
+        rec[f.k] = v;
+      }
+    }
+    if (name === 'pricing' && rec.description === null) rec.description = '';
+    msg.textContent = '';
+    var btn = $('#ci-save');
+    btn.disabled = true;
+    var q = crudEditing.id ? sb.from(name).update(rec).eq('id', crudEditing.id) : sb.from(name).insert(rec);
+    q.then(function (res) {
+      btn.disabled = false;
+      if (res.error) {
+        msg.textContent = /duplicate|unique/i.test(res.error.message || '') ? 'Cet identifiant existe déjà. Choisissez-en un autre.' : 'Enregistrement impossible : ' + res.error.message;
+        return;
+      }
+      dlgItem.close();
+      toast(crudEditing.id ? 'Modifié' : 'Ajouté');
+      loadCrud(name);
+    });
+  });
+
+  $('#add-pricing').addEventListener('click', function () { openCrud('pricing', null); });
+  $('#add-projects').addEventListener('click', function () { openCrud('projects', null); });
+
+  /* ---------- Statistiques ---------- */
+  var EVLABEL = { page_view: 'Page vue', session_start: 'Nouvelle visite', cta_click: 'Clic « Demander un devis »', whatsapp_click: 'Clic WhatsApp',
+    social_click: 'Clic réseau ou email', quote_request: 'Demande de devis', project_view: 'Réalisation consultée', pricing_view: 'Tarifs consultés', outbound_click: 'Lien externe' };
+  var DEVLABEL = { mobile: 'Mobile', tablet: 'Tablette', desktop: 'Ordinateur' };
+
+  function rankList(id, rows, map) {
+    var root = $('#' + id);
+    root.textContent = '';
+    if (!rows || !rows.length) { root.appendChild(el('p', 'state', 'Pas encore de données.')); return; }
+    var max = Math.max.apply(null, rows.map(function (r) { return r.n; })) || 1;
+    rows.forEach(function (r) {
+      var d = el('div', 'rank');
+      var r1 = el('div', 'r1');
+      r1.appendChild(el('span', null, (map && map[r.label]) || r.label));
+      r1.appendChild(el('b', null, String(r.n)));
+      d.appendChild(r1);
+      var bar = el('div', 'bar');
+      bar.style.width = Math.max(3, Math.round(r.n / max * 100)) + '%';
+      d.appendChild(bar);
+      root.appendChild(d);
+    });
+  }
+
+  function statsChart(points) {
+    var box = $('#st-chart');
+    box.textContent = '';
+    if (!points.length) { box.appendChild(el('p', 'mute', 'Aucune donnée pour cette période.')); return; }
+    points = points.slice(-60);
+    var max = Math.max.apply(null, points.map(function (p) { return p.views; })) || 1;
+    var W = 640, H = 190, padB = 28, padT = 20;
+    var slot = W / points.length, bw = Math.max(3, Math.min(40, slot * 0.6));
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Pages vues par jour');
+    points.forEach(function (p, i) {
+      var h = Math.max(2, (p.views / max) * (H - padB - padT));
+      var x = i * slot + (slot - bw) / 2, y = H - padB - h;
+      var r = document.createElementNS(NS, 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', bw); r.setAttribute('height', h); r.setAttribute('fill', '#c9a84c');
+      var t = document.createElementNS(NS, 'title'); t.textContent = fmtDate(p.day) + ' : ' + p.views + ' pages vues, ' + p.visits + ' visites';
+      r.appendChild(t); svg.appendChild(r);
+      if (points.length <= 14 || i % Math.ceil(points.length / 8) === 0) {
+        var l = document.createElementNS(NS, 'text');
+        l.setAttribute('x', x + bw / 2); l.setAttribute('y', H - 8); l.setAttribute('text-anchor', 'middle');
+        l.setAttribute('fill', '#a6a69e'); l.setAttribute('font-size', '12');
+        l.textContent = p.day.slice(8, 10) + '/' + p.day.slice(5, 7);
+        svg.appendChild(l);
+      }
+      if (points.length <= 14) {
+        var v = document.createElementNS(NS, 'text');
+        v.setAttribute('x', x + bw / 2); v.setAttribute('y', y - 5); v.setAttribute('text-anchor', 'middle');
+        v.setAttribute('fill', '#faf9f5'); v.setAttribute('font-size', '12'); v.textContent = String(p.views);
+        svg.appendChild(v);
+      }
+    });
+    box.appendChild(svg);
+  }
+
+  function loadStats() {
+    var state = $('#st-state');
+    state.hidden = true;
+    sb.rpc('analytics_summary', { p_days: parseInt($('#st-period').value, 10) }).then(function (res) {
+      if (res.error || !res.data) {
+        state.hidden = false;
+        state.textContent = 'Impossible de charger les statistiques. Vérifiez que le SQL des statistiques a été exécuté.';
+        return;
+      }
+      var d = res.data;
+      $('#st-visits').textContent = String(d.visits);
+      $('#st-views').textContent = String(d.page_views);
+      $('#st-quotes').textContent = String(d.quotes);
+      $('#st-wa').textContent = String(d.whatsapp);
+      $('#st-cta').textContent = String(d.cta);
+      $('#st-social').textContent = String(d.social);
+      statsChart(d.by_day || []);
+      rankList('st-pages', d.pages);
+      rankList('st-projects', d.projects);
+      rankList('st-sources', d.sources);
+      rankList('st-devices', d.devices, DEVLABEL);
+      rankList('st-browsers', d.browsers);
+      var rec = $('#st-recent');
+      rec.textContent = '';
+      if (!d.recent || !d.recent.length) rec.appendChild(el('p', 'state', 'Aucune activité pour cette période.'));
+      (d.recent || []).forEach(function (e) {
+        var row = el('div', 'ev');
+        row.appendChild(el('b', null, (EVLABEL[e.event] || e.event) + (e.target ? ' : ' + e.target : '')));
+        row.appendChild(el('small', null, fmtDateTime(e.created_at) + ', page ' + (e.page || '?') + ', ' + (DEVLABEL[e.device] || '?') + ', ' + (e.browser || '?') + ', source : ' + (e.referrer_host || 'direct')));
+        rec.appendChild(row);
+      });
+    });
+  }
+  $('#st-period').addEventListener('change', loadStats);
+
   /* ---------- Onglets ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
     t.addEventListener('click', function () {
       var which = t.getAttribute('data-tab');
-      ['orders', 'leads'].forEach(function (n) {
+      if (which === 'stats') loadStats();
+      ['orders', 'leads', 'pricing', 'projects', 'stats'].forEach(function (n) {
         $('#tab-' + n).hidden = (n !== which);
         $('#tab-btn-' + n).setAttribute('aria-selected', String(n === which));
       });

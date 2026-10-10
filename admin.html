@@ -126,7 +126,24 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 .msgbox{border-top:1px solid var(--line);padding-top:14px;white-space:pre-wrap;word-break:break-word}
 .statusrow{display:flex;gap:10px;align-items:center;margin:16px 0}
 .statusrow select{background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:9px 12px}
-@media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.filters{grid-template-columns:1fr}}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 18px;border-bottom:1px solid var(--line)}
+.crow .info{min-width:0;flex:1 1 220px}
+.crow .info b{font-weight:500;display:block}
+.crow .info small{color:var(--mute)}
+.crow .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chk{display:flex;gap:10px;align-items:center;margin-bottom:16px}
+.chk input{width:auto}
+.badge.off{border-color:#4a4a45;color:var(--mute)}
+.kpis3{grid-template-columns:repeat(3,1fr)}
+.stgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px}
+.rank{padding:12px 18px;border-bottom:1px solid var(--line)}
+.rank .r1{display:flex;justify-content:space-between;gap:10px}
+.rank .bar{height:4px;background:var(--gold);margin-top:7px}
+.ev{padding:12px 18px;border-bottom:1px solid var(--line)}
+.ev b{font-weight:500}
+.ev small{display:block;color:var(--mute)}
+#st-period{background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:11px 14px}
+@media (max-width:900px){.stgrid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.filters{grid-template-columns:1fr}}
 @media (max-width:520px){.two,.detail dl{grid-template-columns:1fr}.who span{display:none}}
 </style>
 </head>
@@ -186,6 +203,9 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-btn-orders" aria-selected="true" type="button" data-tab="orders">Commandes</button>
       <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads">Demandes<span class="count" id="leads-count" hidden>0</span></button>
+      <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats">Statistiques</button>
+      <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing">Tarifs</button>
+      <button class="tab" role="tab" id="tab-btn-projects" aria-selected="false" type="button" data-tab="projects">Réalisations</button>
     </nav>
     <div id="tab-orders">
     <div class="head">
@@ -251,6 +271,53 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
         <section class="panel" aria-label="Détail de la demande" id="ldetail"></section>
       </div>
     </div>
+
+    <div id="tab-pricing" hidden>
+      <div class="head">
+        <div><h1>Tarifs</h1><p>Les prix affichés sur le site. Les changements sont visibles tout de suite.</p></div>
+        <button class="btn btn-primary" id="add-pricing" type="button">Ajouter un tarif</button>
+      </div>
+      <section class="panel" aria-label="Liste des tarifs"><div id="list-pricing"></div></section>
+    </div>
+
+    <div id="tab-projects" hidden>
+      <div class="head">
+        <div><h1>Réalisations</h1><p>Les projets affichés dans la section « Nos réalisations ».</p></div>
+        <button class="btn btn-primary" id="add-projects" type="button">Ajouter une réalisation</button>
+      </div>
+      <section class="panel" aria-label="Liste des réalisations"><div id="list-projects"></div></section>
+    </div>
+
+    <div id="tab-stats" hidden>
+      <div class="head">
+        <div><h1>Statistiques</h1><p>Seuls les visiteurs qui ont accepté la mesure d'audience sont comptés.</p></div>
+        <select id="st-period" aria-label="Période">
+          <option value="1">24 heures</option>
+          <option value="7">7 jours</option>
+          <option value="30" selected>30 jours</option>
+          <option value="90">90 jours</option>
+          <option value="0">Tout</option>
+        </select>
+      </div>
+      <p class="state" id="st-state" hidden></p>
+      <div class="kpis kpis3">
+        <div class="kpi gold"><small>Visites</small><strong id="st-visits">0</strong></div>
+        <div class="kpi"><small>Pages vues</small><strong id="st-views">0</strong></div>
+        <div class="kpi"><small>Demandes de devis</small><strong id="st-quotes">0</strong></div>
+        <div class="kpi"><small>Clics WhatsApp</small><strong id="st-wa">0</strong></div>
+        <div class="kpi"><small>Clics « Demander un devis »</small><strong id="st-cta">0</strong></div>
+        <div class="kpi"><small>Clics réseaux sociaux et email</small><strong id="st-social">0</strong></div>
+      </div>
+      <div class="chart-box"><h2>Pages vues par jour</h2><div id="st-chart"></div></div>
+      <div class="stgrid">
+        <section class="panel"><h2>Pages les plus vues</h2><div id="st-pages"></div></section>
+        <section class="panel"><h2>Réalisations consultées</h2><div id="st-projects"></div></section>
+        <section class="panel"><h2>Sources de trafic</h2><div id="st-sources"></div></section>
+        <section class="panel"><h2>Appareils</h2><div id="st-devices"></div></section>
+        <section class="panel"><h2>Navigateurs</h2><div id="st-browsers"></div></section>
+      </div>
+      <section class="panel"><h2>Activité récente</h2><div id="st-recent"></div></section>
+    </div>
   </main>
 </div>
 
@@ -281,6 +348,18 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
     <div class="dlg-actions">
       <button class="btn btn-ghost" type="button" id="dlg-cancel">Annuler</button>
       <button class="btn btn-primary" type="submit" id="dlg-save">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-item">
+  <h2 id="ci-title"></h2>
+  <form id="ci-form" novalidate>
+    <div id="ci-fields"></div>
+    <p class="msg" id="ci-msg" role="alert"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" type="button" id="ci-cancel">Annuler</button>
+      <button class="btn btn-primary" type="submit" id="ci-save">Enregistrer</button>
     </div>
   </form>
 </dialog>

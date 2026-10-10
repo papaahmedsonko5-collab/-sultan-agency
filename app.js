@@ -167,6 +167,7 @@
       if (hp && hp.value) return;
 
       saveLead({ name: name, phone: phone || null, service: planLabel, message: message });
+      track('quote_request', planLabel);
 
       var url = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
@@ -176,6 +177,99 @@
       form.reset();
     });
   }
+
+
+  /* ---------- Mesure d'audience (uniquement avec l'accord du visiteur) ---------- */
+  var SID_KEY = 'sa_sid';
+  var tracking = false;
+
+  function consentOK() { return getConsent() === 'granted'; }
+
+  function sessionId() {
+    try {
+      var s = sessionStorage.getItem(SID_KEY);
+      if (!s) {
+        var bytes = new Uint8Array(8);
+        crypto.getRandomValues(bytes);
+        s = Array.prototype.map.call(bytes, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+        sessionStorage.setItem(SID_KEY, s);
+      }
+      return s;
+    } catch (e) { return null; }
+  }
+  function deviceType() { var w = window.innerWidth; return w < 768 ? 'mobile' : (w < 1100 ? 'tablet' : 'desktop'); }
+  function browserName() {
+    var u = navigator.userAgent;
+    if (/Edg\//.test(u)) return 'Edge';
+    if (/OPR\/|Opera/.test(u)) return 'Opera';
+    if (/Firefox\//.test(u)) return 'Firefox';
+    if (/Chrome\/|CriOS/.test(u)) return 'Chrome';
+    if (/Safari\//.test(u)) return 'Safari';
+    return 'Autre';
+  }
+  function referrerHost() {
+    try {
+      if (!document.referrer) return null;
+      var h = new URL(document.referrer).hostname;
+      return h === location.hostname ? null : h.slice(0, 80);
+    } catch (e) { return null; }
+  }
+  function pageName() {
+    var p = location.pathname.split('/').pop();
+    return (!p || p === 'index.html') ? 'accueil' : p.slice(0, 80);
+  }
+
+  function track(event, target) {
+    if (!consentOK() || !D || !D.api || !D.api.url) return;
+    var id = sessionId();
+    if (!id) return;
+    var rec = { session_id: id, event: event, page: pageName(), device: deviceType(), browser: browserName(),
+      referrer_host: referrerHost(), target: target ? String(target).trim().slice(0, 120) : null };
+    try {
+      fetch(D.api.url + '/rest/v1/analytics_events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': D.api.key, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(rec),
+        keepalive: true
+      }).catch(function () { /* ignoré */ });
+    } catch (e) { /* ignoré */ }
+  }
+
+  function startTracking() {
+    if (tracking || !consentOK()) return;
+    tracking = true;
+    var known = null;
+    try { known = sessionStorage.getItem(SID_KEY); } catch (e) { /* ignoré */ }
+    sessionId();
+    if (!known) track('session_start');
+    track('page_view');
+    var pricing = document.getElementById('tarifs');
+    if (pricing && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { track('pricing_view'); io.disconnect(); }
+      }, { threshold: 0.3 });
+      io.observe(pricing);
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    var proj = a.closest('.project');
+    if (proj) {
+      var h = proj.querySelector('h3');
+      track('project_view', h ? h.textContent : '');
+    } else if (href.indexOf('wa.me') !== -1) {
+      track('whatsapp_click', 'lien direct');
+    } else if (/instagram\.com|snapchat\.com/.test(href)) {
+      track('social_click', /instagram/.test(href) ? 'Instagram' : 'Snapchat');
+    } else if (href.indexOf('mailto:') === 0) {
+      track('social_click', 'Email');
+    } else if (href === '#contact') {
+      track('cta_click', a.textContent);
+    }
+  });
 
   /* Consentement cookies */
   function getConsent() {
@@ -204,7 +298,7 @@
     box.appendChild(actions);
     document.body.appendChild(box);
 
-    function choose(v) { setConsent(v); box.classList.remove('open'); }
+    function choose(v) { setConsent(v); box.classList.remove('open'); if (v === 'granted') startTracking(); }
     no.addEventListener('click', function () { choose('denied'); });
     yes.addEventListener('click', function () { choose('granted'); });
 
@@ -217,9 +311,37 @@
   var year = $('#year');
   if (year) year.textContent = new Date().getFullYear();
 
-  renderPricing();
-  renderProjects();
+  /* Données : lues dans la base, avec repli sur content.js si elle ne répond pas */
+  var PROJECT_STATUS = { termine: 'Terminé', en_cours: 'Projet en cours' };
+
+  function remote(path) {
+    return fetch(D.api.url + '/rest/v1/' + path, { headers: { apikey: D.api.key } })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+
+  function loadData() {
+    if (!D || !D.api || !D.api.url || !window.fetch) return Promise.resolve();
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 3000); });
+    var fetched = Promise.all([
+      remote('pricing?select=*&active=eq.true&order=sort_order.asc'),
+      remote('projects?select=*&published=eq.true&order=sort_order.asc')
+    ]).catch(function () { return null; });
+    return Promise.race([fetched, timeout]).then(function (data) {
+      if (!data) return;
+      D.pricing = data[0].map(function (r) {
+        return { id: r.slug, name: r.name, description: r.description || '', price: Number(r.price),
+          priceLabel: r.price_label || null, badge: r.badge || '', active: true, order: r.sort_order };
+      });
+      D.projects = data[1].map(function (r) {
+        return { id: r.id, title: r.title, category: r.category || '', description: r.description || '',
+          status: PROJECT_STATUS[r.status] || r.status, url: r.url, image: r.image_url, published: true, order: r.sort_order };
+      });
+    });
+  }
+
   initNav();
   initForm();
   initConsent();
+  startTracking();
+  loadData().then(function () { renderPricing(); renderProjects(); });
 })();
