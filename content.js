@@ -29,9 +29,9 @@ window.SULTAN = {
   ],
   projects: [
     { id: 'keur-yaye-rokhaya', title: 'Keur Yaye Rokhaya', category: 'E-commerce', status: 'Terminé',
-      description: 'Boutique en ligne de produits Apple.', url: null, image: null, published: true, order: 1 },
+      description: 'Boutique de produits Apple et smartphones à Dakar, avec commande sur WhatsApp.', url: 'https://keuryayerokhaya.com/', image: null, published: true, order: 1 },
     { id: 'talla-graphique', title: 'Talla Graphique', category: 'Site professionnel', status: 'Terminé',
-      description: 'Création d\'un site web professionnel et portfolio.', url: null, image: null, published: true, order: 2 },
+      description: 'Site professionnel et portfolio d\'un photographe et film maker, avec réservation.', url: 'https://tallaniang.com/', image: null, published: true, order: 2 },
     { id: 'sultan-agency', title: 'Sultan Agency', category: 'Site vitrine', status: 'Terminé',
       description: 'Création du site de l\'agence.', url: null, image: null, published: true, order: 3 }
   ]
