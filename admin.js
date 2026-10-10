@@ -17,6 +17,8 @@
   var pendingLead = null;
   var leadError = '';
   var lf = { status: '', q: '' };
+  var channel = null;
+  var BASE_TITLE = 'Administration | Sultan Agency';
   var LSTATUS = { nouveau: 'Nouveau', contacte: 'Contacté', devis_envoye: 'Devis envoyé', gagne: 'Gagné', perdu: 'Perdu' };
 
   function $(s) { return document.querySelector(s); }
@@ -47,6 +49,7 @@
 
   /* ---------- Authentification ---------- */
   function showLogin(message) {
+    if (channel && sb) { sb.removeChannel(channel); channel = null; }
     userId = null;
     orders = [];
     show('login');
@@ -66,6 +69,8 @@
       show('app');
       loadOrders();
       loadLeads();
+      subscribeLeads();
+      initNotifButton();
     });
   }
 
@@ -416,6 +421,7 @@
     var c = $('#leads-count');
     c.textContent = String(news);
     c.hidden = news === 0;
+    document.title = (news ? '(' + news + ') ' : '') + BASE_TITLE;
 
     var list = leadsFiltered();
     if (!list.some(function (l) { return l.id === selectedLeadId; })) selectedLeadId = list.length ? list[0].id : null;
@@ -516,6 +522,39 @@
       });
     });
   });
+
+  /* ---------- Alertes en direct ---------- */
+  function subscribeLeads() {
+    if (channel || !sb.channel) return;
+    channel = sb.channel('leads-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, function (payload) {
+        var l = payload.new || {};
+        toast('Nouvelle demande de ' + (l.name || 'un visiteur'));
+        browserAlert(l);
+        loadLeads();
+      })
+      .subscribe();
+  }
+
+  function browserAlert(l) {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Nouvelle demande de devis', { body: (l.name || '') + (l.service ? ' : ' + l.service : '') });
+      }
+    } catch (e) { /* non supporté */ }
+  }
+
+  function initNotifButton() {
+    var b = $('#notif');
+    if (!('Notification' in window) || Notification.permission !== 'default') { b.hidden = true; return; }
+    b.hidden = false;
+    b.onclick = function () {
+      Notification.requestPermission().then(function (r) {
+        b.hidden = true;
+        toast(r === 'granted' ? 'Alertes activées sur cet appareil' : 'Alertes refusées', r !== 'granted');
+      });
+    };
+  }
 
   initAuth();
 })();
