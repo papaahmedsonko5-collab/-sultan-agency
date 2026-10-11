@@ -34,5 +34,6 @@ window.SULTAN = {
       description: 'Site professionnel et portfolio d\'un photographe et film maker, avec réservation.', url: 'https://tallaniang.com/', image: null, published: true, order: 2 },
     { id: 'sultan-agency', title: 'Sultan Agency', category: 'Site vitrine', status: 'Terminé',
       description: 'Création du site de l\'agence.', url: null, image: null, published: true, order: 3 }
-  ]
+  ],
+  gallery: []
 };

@@ -205,3 +205,60 @@ p{max-width:62ch}
 
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .form-hint a{color:var(--gold-2)}
+
+/* Signature, branches, formules détaillées, galerie */
+.signature{font:italic 400 clamp(1.05rem,2.4vw,1.35rem) var(--serif);color:var(--gold);margin-bottom:18px;max-width:34ch}
+.page-hero{padding:calc(84px + clamp(40px,7vw,80px)) var(--pad) clamp(40px,6vw,72px)}
+.page-hero h1{font-size:clamp(2.2rem,5.4vw,4rem);max-width:18ch}
+.tick{display:grid;gap:10px;margin:18px 0}
+.tick li{padding-left:22px;position:relative;color:var(--ink);font-size:.97rem}
+.tick li::before{content:"";position:absolute;left:0;top:.62em;width:10px;height:2px;background:var(--gold)}
+.branch{border-top:2px solid var(--gold);padding-top:22px}
+.branch h3{font-size:1.5rem;margin-bottom:10px}
+.branch>p{color:var(--mute)}
+.branch .formats{margin:4px 0 18px;font-size:.92rem}
+.branch.main{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,5vw,64px);align-items:start;margin-bottom:clamp(36px,5vw,56px)}
+.branch.main .hero-cta{margin-top:26px}
+.branch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,48px)}
+.branch-grid .branch .btn{margin-top:6px}
+.packs{border:1px solid var(--line);padding:16px;margin:0 0 18px}
+.packs h4{font:700 1.05rem var(--serif);margin-bottom:10px}
+.pack{padding:10px 0;border-top:1px solid var(--line)}
+.pack:first-of-type{border-top:0}
+.pack p{color:var(--mute);font-size:.92rem}
+.pack-price{display:block;margin-top:4px;font-weight:700}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,32px)}
+.gitem{border-top:1px solid var(--line);padding-top:16px}
+.gitem img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;margin-bottom:14px;border:1px solid var(--line)}
+.gitem h3{font-size:1.2rem;margin:10px 0 6px}
+.gitem p{color:var(--mute);font-size:.95rem;margin-bottom:12px}
+.plans{display:grid;gap:clamp(20px,3vw,32px)}
+.plan{border:1px solid var(--line);background:var(--bg-2);padding:clamp(22px,3vw,36px)}
+.plan-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.plan-head h2{font-size:clamp(1.5rem,3vw,2rem)}
+.plan-head .badge{margin-left:0}
+.plan-price{font:700 1.25rem var(--serif);color:var(--gold-2);margin:10px 0 12px}
+.plan-desc{color:var(--mute);margin-bottom:18px}
+.plan-info{display:grid;gap:16px;margin:0 0 24px}
+.plan-row dt{font-size:.85rem;color:var(--mute);margin-bottom:4px}
+.plan-row dd{color:var(--ink)}
+.plan-list{display:grid;gap:6px;list-style:none}
+.plan-list li{padding-left:20px;position:relative}
+.plan-list li::before{content:"";position:absolute;left:0;top:.7em;width:9px;height:2px;background:var(--gold)}
+.footer-sign{font:italic 400 1.05rem var(--serif);color:var(--gold);margin-bottom:6px}
+.extra-list a,.price-note a{color:var(--gold-2)}
+
+@media (max-width:960px){
+  .branch-grid{grid-template-columns:1fr}
+  .branch.main{grid-template-columns:1fr}
+  .gallery{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .gallery{grid-template-columns:1fr}
+  /* Tarifs lisibles sur téléphone : nom, prix, description, bouton, les uns sous les autres */
+  .price-row{display:block}
+  .price-row .p-name{margin-bottom:6px}
+  .price-row .price-val{margin:6px 0 10px;text-align:left;font-size:1.15rem;color:var(--gold-2)}
+  .price-row .p-desc{margin-bottom:14px}
+  .price-row .p-cta{display:block}
+}

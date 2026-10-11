@@ -21,13 +21,38 @@
     catch (e) { return null; }
   }
 
-  /* Tarifs (source unique : content.js) */
+  /* Tarifs, formules détaillées et forfaits (source unique : base de données, repli content.js) */
+  var BRANCHES = [
+    { id: 'media', label: 'Sultan Media (réseaux sociaux, contenus, vidéos)' },
+    { id: 'artist', label: 'Sultan Artist Management' },
+    { id: 'events', label: 'Sultan Events' }
+  ];
+  function lines(t) { return String(t || '').split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean); }
+  function catOf(p) { return p.category || 'site'; }
+
+  function infoBlock(dl, label, value, asList) {
+    var items = asList ? lines(value) : (value ? [value] : []);
+    if (!items.length) return;
+    var d = el('div', 'plan-row');
+    d.appendChild(el('dt', null, label));
+    var dd = el('dd');
+    if (asList) {
+      var ul = el('ul', 'plan-list');
+      items.forEach(function (t) { ul.appendChild(el('li', null, t)); });
+      dd.appendChild(ul);
+    } else { dd.textContent = items[0]; }
+    d.appendChild(dd);
+    dl.appendChild(d);
+  }
+
   function renderPricing() {
-    var root = $('#pricing-list');
-    var select = $('#f-plan');
     if (!D) return;
-    var plans = D.pricing.filter(function (p) { return p.active; })
-      .sort(function (a, b) { return a.order - b.order; });
+    var root = $('#pricing-list');
+    var plansRoot = $('#plans');
+    var select = $('#f-plan');
+    var all = D.pricing.filter(function (p) { return p.active; }).sort(function (a, b) { return a.order - b.order; });
+    var plans = all.filter(function (p) { return catOf(p) === 'site'; });
+    var packs = all.filter(function (p) { return catOf(p) !== 'site'; });
 
     if (root) {
       root.textContent = '';
@@ -45,23 +70,106 @@
         li.appendChild(a);
         root.appendChild(li);
       });
-      root.addEventListener('click', function (e) {
-        var t = e.target.closest('[data-plan]');
-        if (t && select) select.value = t.getAttribute('data-plan');
+    }
+
+    if (plansRoot) {
+      plansRoot.textContent = '';
+      plans.forEach(function (p) {
+        var art = el('article', 'plan');
+        art.id = 'formule-' + p.id;
+        var head = el('div', 'plan-head');
+        head.appendChild(el('h2', null, p.name));
+        if (p.badge) head.appendChild(el('span', 'badge', p.badge));
+        art.appendChild(head);
+        art.appendChild(el('p', 'plan-price', priceLabel(p)));
+        if (p.description) art.appendChild(el('p', 'plan-desc', p.description));
+        var dl = el('dl', 'plan-info');
+        infoBlock(dl, 'Pour qui', p.audience, false);
+        infoBlock(dl, 'Objectifs du site', p.goals, false);
+        infoBlock(dl, 'Fonctionnalités incluses', p.features, true);
+        infoBlock(dl, 'Limites de la formule', p.limits, false);
+        infoBlock(dl, 'Options possibles', p.options, true);
+        if (dl.children.length) art.appendChild(dl);
+        var a = el('a', 'btn btn-primary', 'Demander un devis');
+        a.href = 'index.html?plan=' + encodeURIComponent(p.id) + '#contact';
+        a.setAttribute('data-plan', p.id);
+        art.appendChild(a);
+        plansRoot.appendChild(art);
       });
     }
 
+    Array.prototype.forEach.call(document.querySelectorAll('[data-packages]'), function (box) {
+      var cat = box.getAttribute('data-packages');
+      var items = packs.filter(function (p) { return catOf(p) === cat; });
+      box.textContent = '';
+      if (!items.length) { box.hidden = true; return; }
+      box.hidden = false;
+      box.appendChild(el('h4', null, cat === 'media' ? 'Forfaits mensuels' : 'Formules'));
+      items.forEach(function (p) {
+        var d = el('div', 'pack');
+        d.appendChild(el('strong', null, p.name));
+        if (p.description) d.appendChild(el('p', null, p.description));
+        d.appendChild(el('span', 'pack-price', p.price > 0 || p.priceLabel ? priceLabel(p) : 'Sur devis'));
+        box.appendChild(d);
+      });
+    });
+
     if (select) {
       select.textContent = '';
-      plans.forEach(function (p) {
-        var o = el('option', null, p.name);
-        o.value = p.id;
-        select.appendChild(o);
-      });
+      plans.forEach(function (p) { var o = el('option', null, p.name); o.value = p.id; select.appendChild(o); });
+      BRANCHES.forEach(function (b) { var o = el('option', null, b.label); o.value = b.id; select.appendChild(o); });
       var other = el('option', null, 'Autre besoin ou je ne sais pas encore');
       other.value = 'autre';
       select.appendChild(other);
+      try {
+        var q = new URLSearchParams(window.location.search);
+        var want = q.get('plan') || q.get('service');
+        if (want && Array.prototype.some.call(select.options, function (o) { return o.value === want; })) {
+          select.value = want;
+          var c = document.getElementById('contact');
+          if (c && window.location.hash === '#contact') c.scrollIntoView();
+        }
+      } catch (e) { /* ignoré */ }
     }
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-plan],[data-service]') : null;
+    var select = $('#f-plan');
+    if (!t || !select) return;
+    var v = t.getAttribute('data-plan') || t.getAttribute('data-service');
+    if (Array.prototype.some.call(select.options, function (o) { return o.value === v; })) select.value = v;
+  });
+
+  /* Galerie : vidéos, recaps, événements (masquée tant qu'elle est vide) */
+  var KIND = { video: 'Vidéo', recap: 'Recap', event: 'Événement', photo: 'Photo' };
+  function renderGallery() {
+    var sec = $('#galerie');
+    var root = $('#gallery-list');
+    if (!sec || !root || !D) return;
+    var items = (D.gallery || []).filter(function (g) { return g.published; }).sort(function (a, b) { return a.order - b.order; });
+    if (!items.length) { sec.hidden = true; return; }
+    sec.hidden = false;
+    root.textContent = '';
+    items.forEach(function (g) {
+      var art = el('article', 'gitem');
+      var iu = g.image ? safeUrl(g.image) : null;
+      if (iu) {
+        var img = document.createElement('img');
+        img.src = iu; img.alt = g.title; img.loading = 'lazy'; img.width = 480; img.height = 300;
+        art.appendChild(img);
+      }
+      art.appendChild(el('span', 'badge', KIND[g.kind] || 'Contenu'));
+      art.appendChild(el('h3', null, g.title));
+      if (g.description) art.appendChild(el('p', null, g.description));
+      var u = g.url ? safeUrl(g.url) : null;
+      if (u) {
+        var a = el('a', 'btn btn-ghost btn-small', 'Voir');
+        a.href = u; a.target = '_blank'; a.rel = 'noopener';
+        art.appendChild(a);
+      }
+      root.appendChild(art);
+    });
   }
 
   /* Réalisations */
@@ -138,42 +246,56 @@
     } catch (e) { /* ignoré */ }
   }
 
-  /* Formulaire : enregistre la demande puis ouvre WhatsApp */
+  /* Formulaire de devis : enregistre la demande puis ouvre WhatsApp */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function initForm() {
     var form = $('#quote-form');
     if (!form || !D) return;
     var wa = $('#link-whatsapp');
     if (wa) wa.href = 'https://wa.me/' + D.contact.whatsapp;
     var msg = $('#form-msg');
+    function fail(text, field) { msg.style.color = ''; msg.textContent = text; if (field) field.focus(); }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var name = form.elements.name.value.trim();
-      var phone = form.elements.phone.value.trim();
-      var plan = form.elements.plan;
+      var f = form.elements;
+      var name = f.name.value.trim();
+      var phone = f.phone.value.trim();
+      var email = f.email.value.trim();
+      var plan = f.plan;
       var planLabel = plan.options[plan.selectedIndex] ? plan.options[plan.selectedIndex].text : '';
-      var message = form.elements.message.value.trim();
+      var budget = f.budget.value.trim();
+      var deadline = f.deadline.value;
+      var message = f.message.value.trim();
 
-      if (!name) { msg.textContent = 'Indiquez votre nom.'; form.elements.name.focus(); return; }
-      if (!message) { msg.textContent = 'Décrivez votre projet en quelques lignes.'; form.elements.message.focus(); return; }
+      if (!name) return fail('Indiquez votre nom ou celui de votre entreprise.', f.name);
+      if (!phone && !email) return fail('Indiquez un numéro de téléphone ou WhatsApp, ou une adresse e-mail.', f.phone);
+      if (phone && phone.replace(/\D/g, '').length < 8) return fail('Ce numéro semble incomplet. Vérifiez-le.', f.phone);
+      if (email && !EMAIL_RE.test(email)) return fail('Cette adresse e-mail semble invalide.', f.email);
+      if (!message) return fail('Décrivez votre besoin en quelques lignes.', f.message);
       msg.style.color = '';
       msg.textContent = '';
 
-      var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
-        'Type de site : ' + planLabel + '.\n' +
-        'Mon projet : ' + message +
-        (phone ? '\nMon numéro : ' + phone : '');
-      var hp = form.elements.website;
+      var hp = f.website;
       if (hp && hp.value) return;
 
-      saveLead({ name: name, phone: phone || null, service: planLabel, message: message });
+      var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
+        'Prestation souhaitée : ' + planLabel + '.\n' +
+        'Mon besoin : ' + message +
+        (budget ? '\nBudget indicatif : ' + budget : '') +
+        (deadline ? '\nDélai souhaité : ' + deadline : '') +
+        (phone ? '\nMon numéro : ' + phone : '') +
+        (email ? '\nMon e-mail : ' + email : '');
+
+      saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
+        budget: budget || null, deadline: deadline || null, message: message });
       track('quote_request', planLabel);
 
       var url = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
       msg.style.color = '#7fcf9a';
-      msg.textContent = 'Demande envoyée. Finalisez-la dans WhatsApp.';
+      msg.textContent = 'Demande envoyée. Finalisez-la dans WhatsApp si la fenêtre s\'est ouverte.';
       form.reset();
     });
   }
@@ -266,7 +388,7 @@
       track('social_click', /instagram/.test(href) ? 'Instagram' : 'Snapchat');
     } else if (href.indexOf('mailto:') === 0) {
       track('social_click', 'Email');
-    } else if (href === '#contact') {
+    } else if (href.slice(-8) === '#contact') {
       track('cta_click', a.textContent);
     }
   });
@@ -324,17 +446,24 @@
     var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 3000); });
     var fetched = Promise.all([
       remote('pricing?select=*&active=eq.true&order=sort_order.asc'),
-      remote('projects?select=*&published=eq.true&order=sort_order.asc')
+      remote('projects?select=*&published=eq.true&order=sort_order.asc'),
+      remote('gallery?select=*&published=eq.true&order=sort_order.asc').catch(function () { return []; })
     ]).catch(function () { return null; });
     return Promise.race([fetched, timeout]).then(function (data) {
       if (!data) return;
       D.pricing = data[0].map(function (r) {
         return { id: r.slug, name: r.name, description: r.description || '', price: Number(r.price),
-          priceLabel: r.price_label || null, badge: r.badge || '', active: true, order: r.sort_order };
+          priceLabel: r.price_label || null, badge: r.badge || '', active: true, order: r.sort_order,
+          category: r.category || 'site', audience: r.audience || '', goals: r.goals || '',
+          features: r.features || '', limits: r.limits || '', options: r.options || '' };
       });
       D.projects = data[1].map(function (r) {
         return { id: r.id, title: r.title, category: r.category || '', description: r.description || '',
           status: PROJECT_STATUS[r.status] || r.status, url: r.url, image: r.image_url, published: true, order: r.sort_order };
+      });
+      D.gallery = data[2].map(function (r) {
+        return { id: r.id, title: r.title, kind: r.kind, description: r.description || '', url: r.url,
+          image: r.image_url, published: true, order: r.sort_order };
       });
     });
   }
@@ -343,5 +472,5 @@
   initForm();
   initConsent();
   startTracking();
-  loadData().then(function () { renderPricing(); renderProjects(); });
+  loadData().then(function () { renderPricing(); renderProjects(); renderGallery(); });
 })();

@@ -72,6 +72,7 @@
       loadLeads();
       loadCrud('pricing');
       loadCrud('projects');
+      loadCrud('gallery');
       subscribeLeads();
       initNotifButton();
     });
@@ -326,7 +327,7 @@
       $('#o-service').value = opts.indexOf(lead.service) !== -1 ? lead.service : 'Autre';
       $('#o-project').value = (lead.service && opts.indexOf(lead.service) !== -1 ? lead.service + ' pour ' : 'Projet pour ') + lead.name;
       $('#o-status').value = 'en_cours';
-      $('#o-notes').value = lead.message || '';
+      $('#o-notes').value = (lead.message || '') + (lead.budget ? '\nBudget indicatif : ' + lead.budget : '') + (lead.deadline ? '\nDélai souhaité : ' + lead.deadline : '');
     }
     $('#order-msg').textContent = '';
     dlg.showModal();
@@ -468,7 +469,10 @@
     var dl = el('dl');
     function row(k, v) { var d = el('div'); d.appendChild(el('dt', null, k)); d.appendChild(el('dd', null, v)); dl.appendChild(d); }
     row('Téléphone', l.phone || 'Non renseigné');
-    row('Type de site', l.service || 'Non précisé');
+    row('E-mail', l.email || 'Non renseigné');
+    row('Prestation', l.service || 'Non précisée');
+    row('Budget indicatif', l.budget || 'Non précisé');
+    row('Délai souhaité', l.deadline || 'Non précisé');
     box.appendChild(dl);
     box.appendChild(el('p', 'msgbox', l.message));
 
@@ -524,16 +528,22 @@
     pricing: {
       label: 'tarif',
       fields: [
+        { k: 'category', label: 'Catégorie', type: 'select', options: { site: 'Site web', media: 'Sultan Media (forfait)', artist: 'Sultan Artist Management', events: 'Sultan Events' }, def: 'site' },
         { k: 'name', label: 'Nom', type: 'text', req: true, max: 80 },
         { k: 'slug', label: 'Identifiant (minuscules, chiffres et tirets)', type: 'text', req: true, pattern: /^[a-z0-9-]{2,40}$/, hint: 'Exemple : site-vitrine' },
         { k: 'price', label: 'Prix de départ (FCFA)', type: 'int', req: true },
         { k: 'price_label', label: 'Prix affiché (vide = calculé automatiquement)', type: 'text', max: 80 },
         { k: 'badge', label: 'Badge (exemple : Populaire)', type: 'text', max: 30 },
-        { k: 'description', label: 'Description', type: 'textarea', max: 300 },
+        { k: 'description', label: 'Description courte', type: 'textarea', max: 300 },
+        { k: 'audience', label: 'Pour qui (vide = rien n\'est affiché)', type: 'textarea', max: 300 },
+        { k: 'goals', label: 'Objectifs du site (facultatif)', type: 'textarea', max: 600 },
+        { k: 'features', label: 'Fonctionnalités incluses (une par ligne)', type: 'textarea', max: 1000 },
+        { k: 'limits', label: 'Limites de la formule (facultatif)', type: 'textarea', max: 600 },
+        { k: 'options', label: 'Options possibles (une par ligne)', type: 'textarea', max: 600 },
         { k: 'sort_order', label: 'Ordre d\'affichage (1 = premier)', type: 'int', def: 0 },
         { k: 'active', label: 'Visible sur le site', type: 'bool', def: true }
       ],
-      describe: function (r) { return { title: r.name + (r.badge ? ' (' + r.badge + ')' : ''), sub: r.price_label || ('À partir de ' + money(r.price)), on: r.active }; },
+      describe: function (r) { var cat = { media: 'Sultan Media', artist: 'Artist Management', events: 'Events' }[r.category]; return { title: r.name + (r.badge ? ' (' + r.badge + ')' : ''), sub: (cat ? cat + ', ' : '') + (r.price_label || ('À partir de ' + money(r.price))), on: r.active }; },
       onLabel: ['Visible', 'Masqué']
     },
     projects: {
@@ -550,10 +560,24 @@
       ],
       describe: function (r) { return { title: r.title, sub: [r.category, PSTATUS[r.status]].filter(Boolean).join(', '), on: r.published }; },
       onLabel: ['Publiée', 'Masquée']
+    },
+    gallery: {
+      label: 'élément de la galerie',
+      fields: [
+        { k: 'title', label: 'Titre', type: 'text', req: true, max: 120 },
+        { k: 'kind', label: 'Type', type: 'select', options: { video: 'Vidéo', recap: 'Recap', event: 'Événement', photo: 'Photo' }, def: 'video' },
+        { k: 'description', label: 'Description (facultatif)', type: 'textarea', max: 300 },
+        { k: 'url', label: 'Lien vers la vidéo ou la publication (https://...)', type: 'url' },
+        { k: 'image_url', label: 'Adresse d\'une image de couverture (https://...)', type: 'url' },
+        { k: 'sort_order', label: 'Ordre d\'affichage (1 = premier)', type: 'int', def: 0 },
+        { k: 'published', label: 'Publié sur le site', type: 'bool', def: true }
+      ],
+      describe: function (r) { return { title: r.title, sub: { video: 'Vidéo', recap: 'Recap', event: 'Événement', photo: 'Photo' }[r.kind] || r.kind, on: r.published }; },
+      onLabel: ['Publié', 'Masqué']
     }
   };
-  var crudRows = { pricing: [], projects: [] };
-  var crudErr = { pricing: '', projects: '' };
+  var crudRows = { pricing: [], projects: [], gallery: [] };
+  var crudErr = { pricing: '', projects: '', gallery: '' };
   var crudEditing = { table: null, id: null };
 
   function loadCrud(name) {
@@ -696,6 +720,7 @@
 
   $('#add-pricing').addEventListener('click', function () { openCrud('pricing', null); });
   $('#add-projects').addEventListener('click', function () { openCrud('projects', null); });
+  $('#add-gallery').addEventListener('click', function () { openCrud('gallery', null); });
 
   /* ---------- Statistiques ---------- */
   var EVLABEL = { page_view: 'Page vue', session_start: 'Nouvelle visite', cta_click: 'Clic « Demander un devis »', whatsapp_click: 'Clic WhatsApp',
@@ -797,7 +822,7 @@
     t.addEventListener('click', function () {
       var which = t.getAttribute('data-tab');
       if (which === 'stats') loadStats();
-      ['orders', 'leads', 'pricing', 'projects', 'stats'].forEach(function (n) {
+      ['orders', 'leads', 'pricing', 'projects', 'gallery', 'stats'].forEach(function (n) {
         $('#tab-' + n).hidden = (n !== which);
         $('#tab-btn-' + n).setAttribute('aria-selected', String(n === which));
       });
