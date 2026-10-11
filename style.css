@@ -262,3 +262,6 @@ p{max-width:62ch}
   .price-row .p-desc{margin-bottom:14px}
   .price-row .p-cta{display:block}
 }
+
+.gitem video{display:block;width:100%;aspect-ratio:9/16;max-height:560px;object-fit:contain;background:#000;margin-bottom:14px;border:1px solid var(--line)}
+.gitem .badge{margin-left:0}

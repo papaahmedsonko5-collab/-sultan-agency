@@ -154,7 +154,19 @@
     items.forEach(function (g) {
       var art = el('article', 'gitem');
       var iu = g.image ? safeUrl(g.image) : null;
-      if (iu) {
+      var u = g.url ? safeUrl(g.url) : null;
+      var isFile = u && /\.(mp4|webm)(\?.*)?$/i.test(u);
+      if (isFile) {
+        var v = document.createElement('video');
+        v.src = u;
+        v.controls = true;
+        v.preload = 'none';
+        v.setAttribute('playsinline', '');
+        if (iu) v.poster = iu;
+        v.setAttribute('aria-label', g.title);
+        v.addEventListener('play', function () { track('project_view', 'Vidéo : ' + g.title); }, { once: true });
+        art.appendChild(v);
+      } else if (iu) {
         var img = document.createElement('img');
         img.src = iu; img.alt = g.title; img.loading = 'lazy'; img.width = 480; img.height = 300;
         art.appendChild(img);
@@ -162,8 +174,7 @@
       art.appendChild(el('span', 'badge', KIND[g.kind] || 'Contenu'));
       art.appendChild(el('h3', null, g.title));
       if (g.description) art.appendChild(el('p', null, g.description));
-      var u = g.url ? safeUrl(g.url) : null;
-      if (u) {
+      if (u && !isFile) {
         var a = el('a', 'btn btn-ghost btn-small', 'Voir');
         a.href = u; a.target = '_blank'; a.rel = 'noopener';
         art.appendChild(a);
