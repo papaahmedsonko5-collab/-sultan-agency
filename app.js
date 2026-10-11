@@ -151,8 +151,12 @@
     if (!items.length) { sec.hidden = true; return; }
     sec.hidden = false;
     root.textContent = '';
-    items.forEach(function (g) {
+    var limit = window.innerWidth < 640 ? 3 : 6;
+    var more = $('#gallery-more');
+    if (more) more.remove();
+    items.forEach(function (g, idx) {
       var art = el('article', 'gitem');
+      if (idx >= limit) { art.hidden = true; art.setAttribute('data-extra', '1'); }
       var iu = g.image ? safeUrl(g.image) : null;
       var u = g.url ? safeUrl(g.url) : null;
       var isFile = u && /\.(mp4|webm)(\?.*)?$/i.test(u);
@@ -181,6 +185,15 @@
       }
       root.appendChild(art);
     });
+    if (items.length > limit) {
+      var btn = el('button', 'btn btn-ghost', 'Voir plus de vidéos');
+      btn.type = 'button'; btn.id = 'gallery-more'; btn.style.marginTop = '28px';
+      btn.addEventListener('click', function () {
+        Array.prototype.forEach.call(root.querySelectorAll('[data-extra]'), function (n) { n.hidden = false; });
+        btn.remove();
+      });
+      root.parentNode.appendChild(btn);
+    }
   }
 
   /* Réalisations */
