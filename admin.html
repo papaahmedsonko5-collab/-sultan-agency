@@ -116,8 +116,9 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 .dlg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold);padding:12px 18px;z-index:99;max-width:calc(100vw - 32px)}
 .toast.err{border-color:#6b2e27;color:var(--err)}
-.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px}
-.tab{background:none;border:0;border-bottom:2px solid transparent;padding:12px 16px;cursor:pointer;color:var(--mute);font-weight:500;margin-bottom:-1px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;flex:none;background:none;border:0;border-bottom:2px solid transparent;padding:12px 16px;cursor:pointer;color:var(--mute);font-weight:500;margin-bottom:-1px}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--gold)}
 .tab .count{display:inline-block;min-width:20px;margin-left:8px;padding:0 6px;border:1px solid var(--gold);border-radius:2px;color:var(--gold2);font-size:.8rem;text-align:center}
 .badge.contacte,.badge.devis_envoye{border-color:var(--warn);color:var(--warn)}
@@ -206,6 +207,7 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
       <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats">Statistiques</button>
       <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing">Tarifs</button>
       <button class="tab" role="tab" id="tab-btn-projects" aria-selected="false" type="button" data-tab="projects">Réalisations</button>
+      <button class="tab" role="tab" id="tab-btn-gallery" aria-selected="false" type="button" data-tab="gallery">Galerie</button>
     </nav>
     <div id="tab-orders">
     <div class="head">
@@ -317,6 +319,14 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
         <section class="panel"><h2>Navigateurs</h2><div id="st-browsers"></div></section>
       </div>
       <section class="panel"><h2>Activité récente</h2><div id="st-recent"></div></section>
+    </div>
+
+    <div id="tab-gallery" hidden>
+      <div class="head">
+        <div><h1>Galerie</h1><p>Vidéos, recaps et événements affichés sur l'accueil. La section reste cachée tant qu'elle est vide.</p></div>
+        <button class="btn btn-primary" id="add-gallery" type="button">Ajouter un élément</button>
+      </div>
+      <section class="panel" aria-label="Liste de la galerie"><div id="list-gallery"></div></section>
     </div>
   </main>
 </div>
