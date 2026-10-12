@@ -121,9 +121,17 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 .tab{white-space:nowrap;flex:none;background:none;border:0;border-bottom:2px solid transparent;padding:12px 16px;cursor:pointer;color:var(--mute);font-weight:500;margin-bottom:-1px}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--gold)}
 .tab .count{display:inline-block;min-width:20px;margin-left:8px;padding:0 6px;border:1px solid var(--gold);border-radius:2px;color:var(--gold2);font-size:.8rem;text-align:center}
-.badge.contacte,.badge.devis_envoye{border-color:var(--warn);color:var(--warn)}
-.badge.gagne{border-color:var(--ok);color:var(--ok)}
-.badge.perdu{border-color:#6b2e27;color:var(--err)}
+.badge.a_contacter,.badge.devis_envoye,.badge.en_negociation{border-color:var(--warn);color:var(--warn)}
+.badge.accepte,.badge.termine{border-color:var(--ok);color:var(--ok)}
+.badge.refuse{border-color:#6b2e27;color:var(--err)}
+.filters4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.notes-box{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
+.notes-box h3{font-size:1.1rem;margin-bottom:10px}
+.notes-box textarea{width:100%;min-height:70px;background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:10px 12px;margin-bottom:8px;resize:vertical}
+.note{border-top:1px solid var(--line);padding:10px 0}
+.note small{color:var(--mute)}
+.note p{white-space:pre-wrap;word-break:break-word;margin:2px 0 4px}
+.note .link{margin:0}
 .msgbox{border-top:1px solid var(--line);padding-top:14px;white-space:pre-wrap;word-break:break-word}
 .statusrow{display:flex;gap:10px;align-items:center;margin:16px 0}
 .statusrow select{background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:9px 12px}
@@ -144,8 +152,9 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 .ev b{font-weight:500}
 .ev small{display:block;color:var(--mute)}
 #st-period{background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:11px 14px}
-@media (max-width:900px){.stgrid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.filters{grid-template-columns:1fr}}
+@media (max-width:900px){.filters4{grid-template-columns:minmax(0,1fr)}.stgrid{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:minmax(0,1fr)}.filters{grid-template-columns:1fr}}
 @media (max-width:520px){.two,.detail dl{grid-template-columns:1fr}.who span{display:none}}
+.order b,.order small,.detail h2,.detail dd,.msgbox p{overflow-wrap:anywhere;min-width:0}
 </style>
 </head>
 <body>
@@ -203,7 +212,7 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
   <main>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-btn-orders" aria-selected="true" type="button" data-tab="orders">Commandes</button>
-      <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads">Demandes<span class="count" id="leads-count" hidden>0</span></button>
+      <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads">Demandes clients<span class="count" id="leads-count" hidden>0</span></button>
       <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats">Statistiques</button>
       <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing">Tarifs</button>
       <button class="tab" role="tab" id="tab-btn-projects" aria-selected="false" type="button" data-tab="projects">Réalisations</button>
@@ -255,18 +264,32 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 
     <div id="tab-leads" hidden>
       <div class="head">
-        <div><h1>Demandes de devis</h1><p>Les demandes envoyées depuis le formulaire du site.</p></div>
+        <div><h1>Demandes clients</h1><p>Les demandes envoyées depuis les formulaires du site.</p></div>
+        <div class="actions" style="margin:0">
+          <button class="btn btn-ghost btn-sm" id="lead-copy" type="button">Copier le lien du formulaire</button>
+          <button class="btn btn-ghost btn-sm" id="lead-share" type="button">Partager sur WhatsApp</button>
+          <button class="btn btn-primary btn-sm" id="lead-export" type="button">Exporter en CSV</button>
+        </div>
       </div>
-      <div class="filters" style="grid-template-columns:1fr 2fr">
+      <div class="filters filters4">
         <select id="lf-status" aria-label="Filtrer par statut">
           <option value="">Tous les statuts</option>
           <option value="nouveau">Nouveau</option>
-          <option value="contacte">Contacté</option>
+          <option value="a_contacter">À contacter</option>
           <option value="devis_envoye">Devis envoyé</option>
-          <option value="gagne">Gagné</option>
-          <option value="perdu">Perdu</option>
+          <option value="en_negociation">En négociation</option>
+          <option value="accepte">Accepté</option>
+          <option value="refuse">Refusé</option>
+          <option value="termine">Terminé</option>
         </select>
-        <input id="lf-q" type="search" placeholder="Rechercher un nom ou un message" aria-label="Rechercher">
+        <select id="lf-service" aria-label="Filtrer par service"><option value="">Tous les services</option></select>
+        <select id="lf-period" aria-label="Filtrer par période">
+          <option value="all">Toute la période</option>
+          <option value="7">7 derniers jours</option>
+          <option value="30">30 derniers jours</option>
+          <option value="90">90 derniers jours</option>
+        </select>
+        <input id="lf-q" type="search" placeholder="Rechercher (nom, entreprise, téléphone, message)" aria-label="Rechercher">
       </div>
       <div class="split">
         <section class="panel" aria-label="Liste des demandes"><h2>Toutes les demandes</h2><div id="llist"></div></section>

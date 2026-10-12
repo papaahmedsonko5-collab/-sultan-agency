@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050505">
+<meta name="robots" content="noindex, follow">
+<title>Demande de devis | Sultan Agency</title>
+<meta name="description" content="Décrivez votre projet à Sultan Agency : site web, réseaux sociaux, artistes, événements. Nous vous répondons avec une proposition adaptée.">
+<link rel="canonical" href="https://papaahmedsonko5-collab.github.io/-sultan-agency/demande.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Sultan Agency">
+<meta property="og:title" content="Demande de devis | Sultan Agency">
+<meta property="og:description" content="Décrivez votre projet en quelques minutes. Nous vous répondons avec une proposition adaptée.">
+<meta property="og:url" content="https://papaahmedsonko5-collab.github.io/-sultan-agency/demande.html">
+<meta property="og:image" content="https://papaahmedsonko5-collab.github.io/-sultan-agency/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Sultan Agency</a>
+    <a class="btn btn-ghost btn-small" href="index.html">Retour au site</a>
+  </div>
+</header>
+
+<main id="contenu" class="request">
+  <div class="wrap">
+    <h1>Demande de devis</h1>
+    <p class="req-intro">Décrivez votre projet en quelques minutes. Plus vous êtes précis, plus notre proposition sera juste. Les champs marqués d'une étoile sont obligatoires.</p>
+
+    <form class="req-form" id="request-form" novalidate>
+      <div class="field">
+        <label for="r-name">Votre nom *</label>
+        <input id="r-name" name="name" type="text" autocomplete="name" maxlength="80" required>
+      </div>
+      <div class="field">
+        <label for="r-company">Entreprise ou marque</label>
+        <input id="r-company" name="company" type="text" autocomplete="organization" maxlength="120">
+      </div>
+      <div class="field">
+        <label for="r-phone">Téléphone ou WhatsApp *</label>
+        <input id="r-phone" name="phone" type="tel" autocomplete="tel" maxlength="25" required>
+      </div>
+      <div class="field">
+        <label for="r-email">Adresse e-mail (facultatif)</label>
+        <input id="r-email" name="email" type="email" autocomplete="email" maxlength="120">
+      </div>
+      <div class="field">
+        <label for="r-sector">Secteur d'activité</label>
+        <input id="r-sector" name="sector" type="text" maxlength="120" placeholder="Exemple : restauration, mode, musique">
+      </div>
+      <div class="field">
+        <label for="f-plan">Service demandé *</label>
+        <select id="f-plan" name="plan"></select>
+      </div>
+      <div class="field span2">
+        <label for="r-message">Description du projet *</label>
+        <textarea id="r-message" name="message" maxlength="1500" required></textarea>
+      </div>
+      <div class="field span2">
+        <label for="r-features">Fonctionnalités souhaitées</label>
+        <textarea id="r-features" name="features" maxlength="1000" placeholder="Exemple : paiement en ligne, réservation, galerie photo"></textarea>
+      </div>
+      <div class="field">
+        <label for="r-budget">Budget indicatif</label>
+        <input id="r-budget" name="budget" type="text" maxlength="80" placeholder="Exemple : 300 000 FCFA">
+      </div>
+      <div class="field">
+        <label for="r-deadline">Délai souhaité</label>
+        <select id="r-deadline" name="deadline">
+          <option value="">Pas précisé</option>
+          <option>Dès que possible</option>
+          <option>Dans le mois</option>
+          <option>Dans 2 à 3 mois</option>
+          <option>Pas de date précise</option>
+        </select>
+      </div>
+      <div class="field span2">
+        <label for="r-links">Liens existants (site, Instagram, TikTok)</label>
+        <textarea id="r-links" name="links" maxlength="500"></textarea>
+      </div>
+      <div class="field span2">
+        <label for="r-comments">Commentaires</label>
+        <textarea id="r-comments" name="comments" maxlength="1000"></textarea>
+      </div>
+      <div class="hp" aria-hidden="true"><label>Ne pas remplir<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+      <div class="span2">
+        <p class="form-msg" id="req-msg" role="alert"></p>
+        <a class="btn btn-ghost" id="req-fallback" href="#" target="_blank" rel="noopener" hidden>Écrire sur WhatsApp</a>
+        <button class="btn btn-primary" type="submit" id="req-submit">Envoyer ma demande</button>
+        <p class="form-hint">Votre demande est enregistrée pour que nous puissions vous répondre. Seule Sultan Agency y a accès. Voir la <a href="confidentialite.html">politique de confidentialité</a>.</p>
+      </div>
+    </form>
+
+    <div class="req-done" id="req-done" hidden>
+      <h2>Merci, votre demande est bien reçue.</h2>
+      <p>Nous l'étudions et nous vous répondons rapidement avec une proposition adaptée.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" id="req-wa" href="#" target="_blank" rel="noopener">Écrire aussi sur WhatsApp</a>
+        <button class="btn btn-ghost" type="button" id="req-again">Envoyer une autre demande</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>
+      <p class="footer-sign">Du digital au terrain, nous donnons vie à vos ambitions.</p>
+      <p>&copy; <span id="year">2026</span> Sultan Agency, Dakar, Sénégal.</p>
+    </div>
+    <nav class="footer-links" aria-label="Informations légales">
+      <a href="index.html">Accueil</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="cookies.html">Cookies</a>
+      <button type="button" data-consent-open>Gérer les cookies</button>
+    </nav>
+  </div>
+</footer>
+
+<script src="content.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

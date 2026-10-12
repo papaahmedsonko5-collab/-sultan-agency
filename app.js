@@ -259,15 +259,18 @@
 
   /* Enregistre la demande dans la base (en plus de WhatsApp) */
   function saveLead(lead) {
-    if (!D || !D.api || !D.api.url) return;
+    if (!D || !D.api || !D.api.url || !window.fetch) return Promise.resolve(false);
     try {
-      fetch(D.api.url + '/rest/v1/leads', {
+      return fetch(D.api.url + '/rest/v1/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': D.api.key, 'Prefer': 'return=minimal' },
         body: JSON.stringify(lead),
         keepalive: true
-      }).catch(function () { /* WhatsApp reste le canal de secours */ });
-    } catch (e) { /* ignoré */ }
+      }).then(function (r) {
+        if (r.ok) return true;
+        return r.text().then(function (t) { return /deja recue/i.test(t); });
+      }).catch(function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
   }
 
   /* Formulaire de devis : enregistre la demande puis ouvre WhatsApp */
@@ -311,19 +314,92 @@
         (phone ? '\nMon numéro : ' + phone : '') +
         (email ? '\nMon e-mail : ' + email : '');
 
-      saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
+      var saving = saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
         budget: budget || null, deadline: deadline || null, message: message });
       track('quote_request', planLabel);
 
       var url = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
-      msg.style.color = '#7fcf9a';
-      msg.textContent = 'Demande envoyée. Finalisez-la dans WhatsApp si la fenêtre s\'est ouverte.';
-      form.reset();
+      msg.style.color = '';
+      msg.textContent = 'Envoi en cours...';
+      saving.then(function (ok) {
+        if (ok) {
+          msg.style.color = '#7fcf9a';
+          msg.textContent = 'Demande enregistrée. Finalisez-la dans WhatsApp si la fenêtre s\'est ouverte.';
+          form.reset();
+        } else {
+          msg.style.color = '';
+          msg.textContent = 'Votre demande n\'a pas pu être enregistrée. Envoyez le message WhatsApp prêt à l\'emploi pour que nous la recevions.';
+        }
+      });
     });
   }
 
+
+
+  /* Page dédiée : demande client complète (lien partageable) */
+  function initRequestForm() {
+    var form = $('#request-form');
+    if (!form || !D) return;
+    var loadedAt = Date.now();
+    var msg = $('#req-msg');
+    var box = $('#req-done');
+    var btn = $('#req-submit');
+    function fail(text, field) { msg.style.color = ''; msg.textContent = text; if (field) field.focus(); }
+    function waLink(text) { return 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text); }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = form.elements;
+      var v = function (n) { return f[n].value.trim(); };
+      var name = v('name'), company = v('company'), phone = v('phone'), email = v('email'), sector = v('sector');
+      var plan = f.plan;
+      var planLabel = plan.options[plan.selectedIndex] ? plan.options[plan.selectedIndex].text : '';
+      var message = v('message'), features = v('features'), budget = v('budget'), deadline = f.deadline.value;
+      var links = v('links'), comments = v('comments');
+
+      if (!name) return fail('Indiquez votre nom.', f.name);
+      if (!phone) return fail('Indiquez votre numéro de téléphone ou WhatsApp.', f.phone);
+      if (phone.replace(/\D/g, '').length < 8) return fail('Ce numéro semble incomplet. Vérifiez-le.', f.phone);
+      if (email && !EMAIL_RE.test(email)) return fail('Cette adresse e-mail semble invalide.', f.email);
+      if (message.length < 10) return fail('Décrivez votre projet en quelques phrases (10 caractères minimum).', f.message);
+      if (f.website && f.website.value) return;
+      if (Date.now() - loadedAt < 3000) return fail('Merci de patienter quelques secondes avant d\'envoyer.');
+      msg.style.color = '';
+      msg.textContent = '';
+
+      var lead = { name: name, company: company || null, phone: phone, email: email || null, sector: sector || null,
+        service: planLabel, message: message, features: features || null, budget: budget || null,
+        deadline: deadline || null, existing_links: links || null, comments: comments || null };
+
+      var wa = waLink('Bonjour Sultan Agency, je suis ' + name + (company ? ' (' + company + ')' : '') +
+        '. Je viens de vous envoyer une demande de devis : ' + planLabel + '.');
+
+      btn.disabled = true;
+      msg.textContent = 'Envoi en cours...';
+      saveLead(lead).then(function (ok) {
+        btn.disabled = false;
+        if (!ok) {
+          msg.style.color = '';
+          msg.textContent = 'Votre demande n\'a pas pu être enregistrée. Réessayez dans un instant, ou écrivez-nous directement sur WhatsApp.';
+          var alt = $('#req-fallback');
+          alt.href = waLink('Bonjour Sultan Agency, je suis ' + name + '. ' + planLabel + ' : ' + message);
+          alt.hidden = false;
+          return;
+        }
+        track('quote_request', planLabel);
+        msg.textContent = '';
+        form.hidden = true;
+        $('#req-wa').href = wa;
+        box.hidden = false;
+        box.scrollIntoView();
+      });
+    });
+
+    var again = $('#req-again');
+    if (again) again.addEventListener('click', function () { box.hidden = true; form.hidden = false; form.reset(); loadedAt = Date.now(); });
+  }
 
   /* ---------- Mesure d'audience (uniquement avec l'accord du visiteur) ---------- */
   var SID_KEY = 'sa_sid';
@@ -494,6 +570,7 @@
 
   initNav();
   initForm();
+  initRequestForm();
   initConsent();
   startTracking();
   loadData().then(function () { renderPricing(); renderProjects(); renderGallery(); });

@@ -17,10 +17,10 @@
   var pendingLead = null;
   var lastOwnOrderId = null;
   var leadError = '';
-  var lf = { status: '', q: '' };
+  var lf = { status: '', service: '', period: 'all', q: '' };
   var channel = null;
   var BASE_TITLE = 'Administration | Sultan Agency';
-  var LSTATUS = { nouveau: 'Nouveau', contacte: 'Contacté', devis_envoye: 'Devis envoyé', gagne: 'Gagné', perdu: 'Perdu' };
+  var LSTATUS = { nouveau: 'Nouveau', a_contacter: 'À contacter', devis_envoye: 'Devis envoyé', en_negociation: 'En négociation', accepte: 'Accepté', refuse: 'Refusé', termine: 'Terminé' };
 
   function $(s) { return document.querySelector(s); }
   function el(tag, cls, text) {
@@ -371,7 +371,7 @@
       var from = pendingLead;
       pendingLead = null;
       if (from && !editingId) {
-        sb.from('leads').update({ status: 'gagne', order_id: res.data.id }).eq('id', from.id).then(function () { loadLeads(); });
+        sb.from('leads').update({ status: 'accepte', order_id: res.data.id }).eq('id', from.id).then(function () { loadLeads(); });
       }
       loadOrders();
     });
@@ -392,11 +392,14 @@
   $('#f-period').addEventListener('change', function (e) { filters.period = e.target.value; render(); });
   $('#f-q').addEventListener('input', function (e) { filters.q = e.target.value; render(); });
 
-  /* ---------- Demandes de devis ---------- */
+  /* ---------- Demandes clients ---------- */
+  var leadNotes = [];
+  var notesFor = null;
+
   function loadLeads() {
     leadError = '';
     sb.from('leads').select('*').order('created_at', { ascending: false }).then(function (res) {
-      if (res.error) { leadError = 'Impossible de charger les demandes. Vérifiez que le SQL des demandes a été exécuté.'; leads = []; }
+      if (res.error) { leadError = 'Impossible de charger les demandes. Vérifiez que le SQL « demandes clients » a été exécuté.'; leads = []; }
       else leads = res.data || [];
       renderLeads();
     });
@@ -404,9 +407,20 @@
 
   function leadsFiltered() {
     var q = lf.q.trim().toLowerCase();
+    var cut = null;
+    if (lf.period !== 'all') {
+      var d = new Date();
+      d.setDate(d.getDate() - Number(lf.period));
+      cut = d.toISOString();
+    }
     return leads.filter(function (l) {
       if (lf.status && l.status !== lf.status) return false;
-      if (q && (l.name + ' ' + (l.message || '')).toLowerCase().indexOf(q) === -1) return false;
+      if (lf.service && l.service !== lf.service) return false;
+      if (cut && l.created_at < cut) return false;
+      if (q) {
+        var hay = [l.name, l.company, l.phone, l.email, l.sector, l.message, l.service].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
       return true;
     });
   }
@@ -423,12 +437,70 @@
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
+  /* Texte libre : liens http(s) cliquables, tout le reste en texte brut (aucun HTML interprété) */
+  function richText(parent, text) {
+    String(text || '').split(/(\s+)/).forEach(function (tok) {
+      if (/^https?:\/\/\S+$/i.test(tok)) {
+        var a = el('a', null, tok);
+        a.href = tok; a.target = '_blank'; a.rel = 'noopener';
+        a.style.color = 'var(--gold-2)';
+        parent.appendChild(a);
+      } else if (tok) { parent.appendChild(document.createTextNode(tok)); }
+    });
+  }
+
+  function fillServiceFilter() {
+    var sel = $('#lf-service');
+    var keep = lf.service;
+    var names = [];
+    leads.forEach(function (l) { if (l.service && names.indexOf(l.service) === -1) names.push(l.service); });
+    names.sort();
+    sel.textContent = '';
+    var all = el('option', null, 'Tous les services'); all.value = ''; sel.appendChild(all);
+    names.forEach(function (n) { var o = el('option', null, n); o.value = n; sel.appendChild(o); });
+    sel.value = names.indexOf(keep) !== -1 ? keep : '';
+    lf.service = sel.value;
+  }
+
+  function loadNotes(leadId) {
+    notesFor = leadId;
+    sb.from('lead_notes').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }).then(function (res) {
+      if (notesFor !== leadId) return;
+      leadNotes = res.error ? [] : (res.data || []);
+      renderNotes(res.error ? 'Notes indisponibles : le SQL « demandes clients » n\'a pas été exécuté.' : '');
+    });
+  }
+
+  function renderNotes(err) {
+    var root = $('#lead-notes');
+    if (!root) return;
+    root.textContent = '';
+    if (err) { root.appendChild(el('p', 'mute', err)); return; }
+    if (!leadNotes.length) { root.appendChild(el('p', 'mute', 'Aucune note pour le moment.')); return; }
+    leadNotes.forEach(function (n) {
+      var row = el('div', 'note');
+      row.appendChild(el('small', null, fmtDateTime(n.created_at)));
+      row.appendChild(el('p', null, n.body));
+      var del = el('button', 'link', 'Supprimer'); del.type = 'button';
+      del.addEventListener('click', function () {
+        if (!window.confirm('Supprimer cette note ?')) return;
+        sb.from('lead_notes').delete().eq('id', n.id).then(function (res) {
+          if (res.error) { toast('Suppression impossible', true); return; }
+          loadNotes(notesFor);
+        });
+      });
+      row.appendChild(del);
+      root.appendChild(row);
+    });
+  }
+
   function renderLeads() {
     var news = leads.filter(function (l) { return l.status === 'nouveau'; }).length;
     var c = $('#leads-count');
     c.textContent = String(news);
     c.hidden = news === 0;
     document.title = (news ? '(' + news + ') ' : '') + BASE_TITLE;
+    fillServiceFilter();
 
     var list = leadsFiltered();
     if (!list.some(function (l) { return l.id === selectedLeadId; })) selectedLeadId = list.length ? list[0].id : null;
@@ -442,7 +514,7 @@
       retry.addEventListener('click', loadLeads);
       root.appendChild(retry);
     } else if (!list.length) {
-      root.appendChild(el('p', 'state', leads.length ? 'Aucune demande ne correspond à ces filtres.' : 'Aucune demande pour le moment. Elles apparaîtront ici dès qu\'un visiteur remplira le formulaire du site.'));
+      root.appendChild(el('p', 'state', leads.length ? 'Aucune demande ne correspond à ces filtres.' : 'Aucune demande pour le moment. Elles apparaîtront ici dès qu\'un visiteur remplira un formulaire.'));
     } else {
       list.forEach(function (l) {
         var b = el('button', 'order');
@@ -450,7 +522,7 @@
         b.setAttribute('aria-pressed', String(l.id === selectedLeadId));
         b.appendChild(el('b', null, l.name));
         b.appendChild(el('span', 'amt', fmtDateTime(l.created_at).slice(0, 10)));
-        b.appendChild(el('small', null, l.service || 'Type non précisé'));
+        b.appendChild(el('small', null, [l.company, l.service].filter(Boolean).join(', ') || 'Service non précisé'));
         var badge = el('span', 'badge ' + l.status, LSTATUS[l.status] || l.status);
         badge.style.justifySelf = 'end';
         b.appendChild(badge);
@@ -462,7 +534,7 @@
     var p = $('#ldetail');
     p.textContent = '';
     var l = leads.filter(function (x) { return x.id === selectedLeadId; })[0];
-    if (!l) { p.appendChild(el('p', 'state', 'Sélectionnez une demande pour voir son détail.')); return; }
+    if (!l) { notesFor = null; p.appendChild(el('p', 'state', 'Sélectionnez une demande pour voir son détail.')); return; }
     var box = el('div', 'detail');
     box.appendChild(el('h2', null, l.name));
     box.appendChild(el('p', 'mute', 'Reçue le ' + fmtDateTime(l.created_at)));
@@ -470,11 +542,26 @@
     function row(k, v) { var d = el('div'); d.appendChild(el('dt', null, k)); d.appendChild(el('dd', null, v)); dl.appendChild(d); }
     row('Téléphone', l.phone || 'Non renseigné');
     row('E-mail', l.email || 'Non renseigné');
-    row('Prestation', l.service || 'Non précisée');
+    row('Entreprise', l.company || 'Non renseignée');
+    row('Secteur d\'activité', l.sector || 'Non renseigné');
+    row('Service demandé', l.service || 'Non précisé');
     row('Budget indicatif', l.budget || 'Non précisé');
     row('Délai souhaité', l.deadline || 'Non précisé');
     box.appendChild(dl);
-    box.appendChild(el('p', 'msgbox', l.message));
+
+    function block(label, text) {
+      if (!text) return;
+      var d = el('div', 'msgbox');
+      d.appendChild(el('small', 'mute', label));
+      var pEl = el('p'); pEl.style.marginTop = '4px';
+      richText(pEl, text);
+      d.appendChild(pEl);
+      box.appendChild(d);
+    }
+    block('Description du projet', l.message);
+    block('Fonctionnalités souhaitées', l.features);
+    block('Liens existants', l.existing_links);
+    block('Commentaires du client', l.comments);
 
     var sr = el('div', 'statusrow');
     var lab = el('label', null, 'Statut');
@@ -504,11 +591,11 @@
       conv.addEventListener('click', function () { openForm(null, l); });
       act.appendChild(conv);
     } else {
-      act.appendChild(el('span', 'badge gagne', 'Déjà transformée en commande'));
+      act.appendChild(el('span', 'badge accepte', 'Déjà transformée en commande'));
     }
     var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
     del.addEventListener('click', function () {
-      if (!window.confirm('Supprimer la demande de « ' + l.name + ' » ? Cette action est définitive.')) return;
+      if (!window.confirm('Supprimer la demande de « ' + l.name + ' » et ses notes ? Cette action est définitive.')) return;
       sb.from('leads').delete().eq('id', l.id).then(function (res) {
         if (res.error) { toast('Suppression impossible', true); return; }
         toast('Demande supprimée'); selectedLeadId = null; loadLeads();
@@ -516,11 +603,89 @@
     });
     act.appendChild(del);
     box.appendChild(act);
+
+    var nb = el('div', 'notes-box');
+    nb.appendChild(el('h3', null, 'Notes internes'));
+    var ta = el('textarea'); ta.id = 'note-input'; ta.maxLength = 2000; ta.placeholder = 'Exemple : rappeler jeudi, budget serré';
+    ta.setAttribute('aria-label', 'Nouvelle note');
+    var add = el('button', 'btn btn-ghost btn-sm', 'Ajouter la note'); add.type = 'button'; add.id = 'note-add';
+    add.addEventListener('click', function () {
+      var body = ta.value.trim();
+      if (!body) { toast('Écrivez une note avant de l\'ajouter', true); return; }
+      add.disabled = true;
+      sb.from('lead_notes').insert({ lead_id: l.id, body: body }).then(function (res) {
+        add.disabled = false;
+        if (res.error) { toast('Note non enregistrée', true); return; }
+        ta.value = '';
+        toast('Note ajoutée');
+        loadNotes(l.id);
+      });
+    });
+    nb.appendChild(ta); nb.appendChild(add);
+    var nl = el('div'); nl.id = 'lead-notes'; nb.appendChild(nl);
+    box.appendChild(nb);
     p.appendChild(box);
+    if (notesFor !== l.id) { leadNotes = []; renderNotes(''); loadNotes(l.id); } else { renderNotes(''); }
+  }
+
+  /* Export CSV (accents lisibles dans Excel, cellules neutralisées contre l'injection de formules) */
+  function csvCell(v) {
+    var s = (v === null || v === undefined) ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  function exportLeadsCsv() {
+    var list = leadsFiltered();
+    if (!list.length) { toast('Aucune demande à exporter', true); return; }
+    var cols = [
+      ['Date', function (l) { return fmtDateTime(l.created_at); }],
+      ['Nom', function (l) { return l.name; }],
+      ['Entreprise', function (l) { return l.company; }],
+      ['Téléphone', function (l) { return l.phone; }],
+      ['E-mail', function (l) { return l.email; }],
+      ['Secteur', function (l) { return l.sector; }],
+      ['Service', function (l) { return l.service; }],
+      ['Description', function (l) { return l.message; }],
+      ['Fonctionnalités', function (l) { return l.features; }],
+      ['Budget', function (l) { return l.budget; }],
+      ['Délai', function (l) { return l.deadline; }],
+      ['Liens existants', function (l) { return l.existing_links; }],
+      ['Commentaires', function (l) { return l.comments; }],
+      ['Statut', function (l) { return LSTATUS[l.status] || l.status; }]
+    ];
+    var out = [cols.map(function (c) { return csvCell(c[0]); }).join(';')];
+    list.forEach(function (l) { out.push(cols.map(function (c) { return csvCell(c[1](l)); }).join(';')); });
+    var blob = new Blob(['\uFEFF' + out.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'demandes-clients-' + isoDate(new Date()) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast(list.length + ' demande(s) exportée(s)');
+  }
+
+  /* Lien du formulaire public à partager */
+  function formUrl() { return window.location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '') + 'demande.html'; }
+  function copyFormLink() {
+    var url = formUrl();
+    function done() { toast('Lien copié : ' + url); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, function () { window.prompt('Copiez ce lien :', url); });
+    } else { window.prompt('Copiez ce lien :', url); }
+  }
+  function shareFormLink() {
+    var text = 'Bonjour, voici le formulaire pour décrire votre projet à Sultan Agency : ' + formUrl();
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
 
   $('#lf-status').addEventListener('change', function (e) { lf.status = e.target.value; renderLeads(); });
+  $('#lf-service').addEventListener('change', function (e) { lf.service = e.target.value; renderLeads(); });
+  $('#lf-period').addEventListener('change', function (e) { lf.period = e.target.value; renderLeads(); });
   $('#lf-q').addEventListener('input', function (e) { lf.q = e.target.value; renderLeads(); });
+  $('#lead-export').addEventListener('click', exportLeadsCsv);
+  $('#lead-copy').addEventListener('click', copyFormLink);
+  $('#lead-share').addEventListener('click', shareFormLink);
 
   /* ---------- Tarifs et réalisations ---------- */
   var PSTATUS = { en_cours: 'Projet en cours', termine: 'Terminé' };
