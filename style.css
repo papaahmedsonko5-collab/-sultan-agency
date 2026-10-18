@@ -285,3 +285,88 @@ p{max-width:62ch}
 @media (max-width:700px){.req-form{grid-template-columns:1fr}}
 
 [hidden]{display:none !important}
+
+/* ---------- Améliorations octobre 2026 ---------- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.nav-list a.nav-cta{color:#0a0a0a}
+.nav-list a.nav-cta:hover{color:#0a0a0a}
+.eyebrow{font:500 .82rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-2);margin-bottom:18px}
+.hero-note{margin-top:22px;color:var(--mute);font-size:.9rem}
+
+/* Branches */
+.branch-tag{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-2);margin-bottom:8px}
+.branch.main{border:1px solid var(--gold);border-top-width:2px;background:var(--bg-2);padding:clamp(22px,4vw,40px)}
+.branch.main h3{font-size:clamp(1.7rem,3.4vw,2.2rem)}
+.branch-who{margin-top:12px;font-size:.93rem;color:var(--mute)}
+.branch-who strong{color:var(--ink);font-weight:500}
+.branch-grid .branch h3{font-size:1.3rem}
+
+/* Tarifs : cartes comparables */
+.price-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,22px)}
+.pc{border:1px solid var(--line);background:var(--bg-2);padding:22px;display:flex;flex-direction:column;gap:8px}
+.pc-hl{border-color:var(--gold)}
+.pc h3{font-size:1.3rem}
+.pc .badge{margin-left:6px}
+.pc-price{font:700 1.2rem var(--serif);color:var(--gold-2)}
+.pc-desc{color:var(--mute);font-size:.95rem}
+.pc-who{font-size:.88rem;color:var(--ink)}
+.pc .btn{margin-top:auto;align-self:flex-start}
+.price-terms{margin-top:28px;border:1px solid var(--line);padding:20px 22px}
+.price-terms h3{font-size:1.15rem}
+.price-terms .tick{margin:14px 0 0}
+.price-terms strong{font-weight:500}
+.price-terms a{color:var(--gold-2)}
+
+/* Tableau comparatif */
+.table-scroll{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:clamp(32px,5vw,56px);border:1px solid var(--line)}
+.compare{width:100%;border-collapse:collapse;min-width:560px;font-size:.95rem}
+.compare th,.compare td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.compare thead th{font:500 .8rem var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.compare tbody th{font:700 1.02rem var(--serif)}
+.compare td:nth-child(2){white-space:nowrap;color:var(--gold-2);font-weight:700}
+.compare td:nth-child(3){color:var(--mute)}
+.compare tbody tr:last-child th,.compare tbody tr:last-child td{border-bottom:0}
+
+/* Réalisations : cartes avec capture */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,28px)}
+.pcard{border:1px solid var(--line);background:var(--bg-2);display:flex;flex-direction:column}
+.pcard-shot{position:relative;display:block;aspect-ratio:16/10;background:#14140f;border-bottom:1px solid var(--line);overflow:hidden;text-decoration:none}
+.pcard-ph{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;font:700 1.1rem var(--serif);color:var(--gold)}
+.pcard-shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+a.pcard-shot:hover img{opacity:.92}
+.pcard-body{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.pcard-type{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-2)}
+.pcard h3{font-size:1.35rem}
+.pcard-body>p:not(.pcard-type):not(.pcard-here){color:var(--mute);font-size:.95rem}
+.pcard-body .btn{margin-top:auto;align-self:flex-start}
+.pcard-here,.pcard-status{margin-top:auto;font-size:.88rem;color:var(--gold-2)}
+
+/* Parcours en 10 étapes */
+.steps-10{grid-template-columns:repeat(5,1fr)}
+.steps-10 li::before{font-size:1.3rem}
+.steps-10 strong{font-size:1.02rem}
+.steps-10 p{font-size:.9rem}
+
+/* Formulaire */
+.form-req{color:var(--mute);font-size:.88rem}
+.field small{color:var(--mute);font-size:.82rem}
+.field [aria-invalid="true"]{border-color:#ff9b8a}
+.form-msg.err{color:#ff9b8a}
+.form-msg a{color:var(--gold-2)}
+.form-noscript{border:1px solid var(--gold);padding:16px;margin-bottom:18px}
+.form-noscript a{color:var(--gold-2)}
+#quote-done h3{font-size:clamp(1.4rem,3vw,1.8rem);margin-bottom:10px}
+#quote-done:focus{outline:none}
+.contact-intro a{color:var(--gold-2)}
+.btn:disabled{opacity:.6;cursor:wait}
+.field input,.field select,.field textarea,.req-form .field input,.req-form .field select,.req-form .field textarea{font-size:16px}
+
+@media (max-width:960px){
+  .price-cards,.pgrid{grid-template-columns:repeat(2,1fr)}
+  .steps-10{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:640px){
+  .price-cards,.pgrid{grid-template-columns:1fr}
+  .steps-10{grid-template-columns:repeat(2,1fr)}
+  .pc .btn,.pcard-body .btn{align-self:stretch}
+}
