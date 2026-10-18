@@ -419,3 +419,5 @@ a.pcard-shot:hover img{opacity:.92}
   .site-header .logo{font-size:1.1rem}
   .header-cta{padding:8px 12px;font-size:.82rem}
 }
+.founder-link{margin-bottom:32px}
+.founder-link p{color:var(--mute);font-size:.98rem;max-width:64ch}
