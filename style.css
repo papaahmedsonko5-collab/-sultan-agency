@@ -423,3 +423,87 @@ a.pcard-shot:hover img{opacity:.92}
 .founder-link p{color:var(--mute);font-size:.98rem;max-width:64ch}
 .founder-main p+p{margin-top:16px}
 .founder-main p.founder-end{color:var(--ink);margin-top:22px}
+
+/* ---------- Tarifs de lancement et conversion (octobre 2026, 3) ---------- */
+.section-head .eyebrow{margin-bottom:12px}
+.price-from{display:block;font:500 .78rem var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.price-amount{display:block;font:700 1.55rem/1.2 var(--serif);color:var(--gold-2)}
+.pc{padding:24px;gap:12px}
+.pc-hl{box-shadow:inset 0 2px 0 var(--gold)}
+.pc h3{font-size:1.25rem;line-height:1.25}
+.pc-feats{margin:4px 0 2px;font-size:.92rem;color:var(--ink)}
+.pc-who{color:var(--mute);font-size:.86rem}
+.pc .btn{align-self:stretch;margin-top:auto}
+.plan-price .price-amount{font-size:1.7rem}
+.price-terms{margin-top:clamp(28px,4vw,40px);padding:clamp(20px,3vw,32px);background:var(--bg-2)}
+.price-terms h3{font-size:clamp(1.2rem,2.4vw,1.45rem)}
+.price-terms-intro{color:var(--mute);margin-top:10px;font-size:.95rem}
+.terms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 clamp(24px,4vw,48px);margin-top:12px}
+.terms-grid li{padding:14px 0;border-bottom:1px solid var(--line)}
+.terms-grid li:last-child{border-bottom:0}
+.terms-grid strong{display:block;font:700 1.02rem var(--serif);margin-bottom:4px;color:var(--ink)}
+.terms-grid p{color:var(--mute);font-size:.93rem}
+.price-terms-note,.extra-note{margin-top:16px;padding-left:14px;border-left:2px solid var(--gold);color:var(--ink);font-size:.93rem}
+
+/* Réalisations */
+.pcard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:8px}
+.pcard-body .pcard-actions .btn{margin-top:0;align-self:auto}
+.pcard-here{margin-top:0}
+
+/* Formulaire : cases à cocher */
+.checks{border:1px solid var(--line);border-radius:2px;padding:12px 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.checks legend{font-size:.92rem;padding:0 6px}
+.checks label{display:flex;align-items:center;gap:10px;min-height:40px;font-size:.93rem;cursor:pointer}
+.checks input{width:20px;height:20px;flex:none;accent-color:var(--gold)}
+
+/* Cibles tactiles confortables */
+.btn{min-height:44px}
+.btn-small{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.nav-toggle{min-height:44px}
+@media (min-width:861px){.site-header .header-cta{display:none}}
+.site-header .header-cta.btn-small{min-height:44px}
+.footer-links a,.footer-links button{display:inline-block;padding:6px 0}
+
+@media (max-width:960px){
+  .terms-grid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .price-amount{font-size:1.45rem}
+  .pcard-actions .btn{flex:1 1 auto}
+  .checks{grid-template-columns:1fr}
+  /* Tableau comparatif en cartes empilées : plus de défilement horizontal */
+  .table-scroll{overflow:visible;border:0}
+  .compare{min-width:0}
+  .compare thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .compare,.compare tbody,.compare tr,.compare th,.compare td{display:block;width:100%}
+  .compare tr{border:1px solid var(--line);background:var(--bg-2);padding:14px 16px;margin-bottom:12px}
+  .compare th,.compare td{padding:4px 0;border:0}
+  .compare td[data-label]::before{content:attr(data-label);display:block;font:500 .75rem var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--mute);font-weight:500}
+  .compare td:nth-child(2){white-space:normal}
+  .compare td:last-child{padding-top:10px}
+  .compare td:last-child .btn{width:100%}
+}
+@media (max-width:380px){
+  .site-header .wrap{padding-left:14px;padding-right:14px;gap:8px}
+  .header-cta{padding:8px 10px;font-size:.78rem}
+  .nav-toggle{padding:8px 10px}
+}
+.nav-list a,.header-cta{white-space:nowrap}
+@media (min-width:861px) and (max-width:1120px){
+  .nav-list{gap:18px}
+  .nav-list a{font-size:.9rem}
+}
+@media (max-width:340px){
+  .site-header .logo{font-size:1rem}
+  .header-cta{font-size:.76rem;padding:8px}
+}
+.logo{white-space:nowrap}
+@media (min-width:861px) and (max-width:1000px){
+  .site-header .wrap{gap:14px}
+  .nav-list{gap:14px}
+  .nav-list a{font-size:.85rem}
+}
+@media (max-width:340px){
+  .site-header .wrap{padding-left:12px;padding-right:12px;gap:6px}
+  .nav-toggle{padding:8px}
+}
