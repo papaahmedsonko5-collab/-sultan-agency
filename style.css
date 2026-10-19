@@ -113,9 +113,9 @@ em.gold,.gold{font-style:italic;color:var(--gold-2)}
 
 /* Bandeau défilant des disciplines */
 .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg-2)}
-.ticker-track{display:flex;width:max-content;animation:tick 38s linear infinite}
-.ticker-track span{font:italic 400 clamp(1.1rem,2.4vw,1.6rem) var(--serif);padding:18px 28px;white-space:nowrap;color:var(--ink)}
-.ticker-track span:nth-child(even){color:var(--gold);font-style:normal;padding:18px 0}
+.ticker-track{display:flex;width:max-content;animation:tick 45s linear infinite}
+.ticker-track span{font:500 .72rem/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;padding:13px 18px;white-space:nowrap;color:var(--mute)}
+.ticker-track span:nth-child(even){color:var(--gold);padding:13px 0;font-size:.6rem}
 @keyframes tick{to{transform:translateX(-50%)}}
 
 /* ---------- Manifeste ---------- */
@@ -519,6 +519,6 @@ em.gold,.gold{font-style:italic;color:var(--gold-2)}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .ticker-track{animation:none}
+  .ticker-track{animation-duration:90s}
   .pole-media img,.btn .arr{transition:none}
 }
