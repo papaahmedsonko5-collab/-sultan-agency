@@ -309,7 +309,8 @@
         var img = document.createElement('img');
         img.src = src;
         img.alt = 'Capture d\'écran de la page d\'accueil de ' + p.title;
-        img.width = 1280; img.height = 800;
+        if (/images\/projets\//.test(src)) img.className = 'shot-mobile';
+        img.width = 540; img.height = 776;
         img.loading = 'lazy'; img.decoding = 'async';
         img.addEventListener('error', function () { img.remove(); });
         shot.appendChild(img);
