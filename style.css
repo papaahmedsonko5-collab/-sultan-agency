@@ -107,9 +107,6 @@ em.gold,.gold{font-style:italic;color:var(--gold-2)}
 .shot figcaption b{display:block;font:700 .95rem var(--serif);letter-spacing:0;text-transform:none;color:var(--gold-2)}
 .mosaic .shot:nth-child(2){margin-top:48px}
 .mosaic .shot:nth-child(3){margin-top:16px}
-.code-card{position:absolute;left:-28px;top:-26px;width:min(250px,70%);background:var(--bg-2);border:1px solid var(--gold);padding:14px 16px;font:400 .78rem/1.6 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;color:var(--mute);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-.code-card b{display:block;font:700 .9rem var(--serif);color:var(--gold-2);margin-bottom:6px}
-.code-card i{font-style:normal;color:var(--gold-2)}
 
 /* Bandeau défilant des disciplines */
 .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg-2)}
@@ -453,8 +450,7 @@ em.gold,.gold{font-style:italic;color:var(--gold-2)}
   .hero>.wrap,.page-hero.with-media>.wrap{grid-template-columns:1fr}
   .hero h1{max-width:16ch}
   .mosaic{max-width:560px}
-  .code-card{left:auto;right:-8px;top:-18px}
-  .page-hero .shot{margin:0;max-width:260px;aspect-ratio:4/5}
+    .page-hero .shot{margin:0;max-width:260px;aspect-ratio:4/5}
   .poles{grid-template-columns:1fr}
   .approach{grid-template-columns:repeat(2,1fr)}
   .synergy-flow{grid-template-columns:repeat(2,1fr)}
@@ -488,8 +484,7 @@ em.gold,.gold{font-style:italic;color:var(--gold-2)}
   .pcard-actions .btn{flex:1 1 auto}
   .mosaic{gap:8px}
   .mosaic .shot:nth-child(2){margin-top:28px}
-  .code-card{position:relative;right:auto;bottom:auto;grid-column:1 / -1;width:100%;margin-top:4px}
-  .shot figcaption{padding:20px 8px 8px;font-size:.62rem}
+    .shot figcaption{padding:20px 8px 8px;font-size:.62rem}
   .shot figcaption b{font-size:.8rem}
   .wa-float span{display:none}
   .wa-float{padding:0;width:52px;justify-content:center}
