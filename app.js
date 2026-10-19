@@ -3,6 +3,7 @@
 
   var D = window.SULTAN || null;
   var CONSENT_KEY = 'sa_consent';
+  document.documentElement.classList.add('js');
 
   function $(s) { return document.querySelector(s); }
   function el(tag, cls, text) {
@@ -25,15 +26,15 @@
     return t.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
   }
   function safeUrl(u) {
-    try { var x = new URL(u); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : null; }
+    try { var x = new URL(u, location.href); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : null; }
     catch (e) { return null; }
   }
 
   /* Tarifs, formules détaillées et forfaits (source unique : base de données, repli content.js) */
   var BRANCHES = [
-    { id: 'media', label: 'Sultan Media (réseaux sociaux, contenus, vidéos)' },
-    { id: 'artist', label: 'Sultan Artist Management' },
-    { id: 'events', label: 'Sultan Events' }
+    { id: 'artist', label: 'Sultan Artist Management (artistes, musique)' },
+    { id: 'media', label: 'Sultan Media (communication, contenus, vidéos)' },
+    { id: 'events', label: 'Sultan Events (événementiel)' }
   ];
   function lines(t) { return String(t || '').split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean); }
   function catOf(p) { return p.category || 'site'; }
@@ -82,7 +83,7 @@
         }
         if (p.audience) art.appendChild(el('p', 'pc-who', p.audience));
         var a = el('a', p.badge ? 'btn btn-primary' : 'btn btn-ghost', 'Demander un devis');
-        a.href = '#contact';
+        a.href = contactUrl({ plan: p.id });
         a.setAttribute('data-plan', p.id);
         art.appendChild(a);
         root.appendChild(art);
@@ -106,8 +107,7 @@
         tr.appendChild(tdWho);
         var td = el('td');
         var a = el('a', 'btn btn-ghost btn-small', 'Demander un devis');
-        a.href = 'index.html?plan=' + encodeURIComponent(p.id) + '#contact';
-        a.setAttribute('data-plan', p.id);
+        a.href = contactUrl({ plan: p.id });
         td.appendChild(a);
         tr.appendChild(td);
         compare.appendChild(tr);
@@ -135,8 +135,7 @@
         infoBlock(dl, 'Options possibles', p.options, true);
         if (dl.children.length) art.appendChild(dl);
         var a = el('a', 'btn btn-primary', 'Demander un devis');
-        a.href = 'index.html?plan=' + encodeURIComponent(p.id) + '#contact';
-        a.setAttribute('data-plan', p.id);
+        a.href = contactUrl({ plan: p.id });
         art.appendChild(a);
         plansRoot.appendChild(art);
       });
@@ -166,44 +165,73 @@
       var other = el('option', null, 'Autre besoin ou je ne sais pas encore');
       other.value = 'autre';
       select.appendChild(other);
-      if (current && Array.prototype.some.call(select.options, function (o) { return o.value === current; })) select.value = current;
+      if (current && hasOption(select, current)) select.value = current;
+    }
+
+    /* Page contact : formules de sites proposées quand le projet est digital */
+    var cplan = $('#c-plan');
+    if (cplan && plans.length) {
+      var keep = cplan.value;
+      cplan.textContent = '';
+      var none = el('option', null, 'Pas encore défini');
+      none.value = '';
+      cplan.appendChild(none);
+      plans.forEach(function (p) { var o = el('option', null, p.name + ' (' + priceLabel(p).replace('À partir de', 'dès') + ')'); o.value = p.id; o.setAttribute('data-name', p.name); cplan.appendChild(o); });
+      var want = keep || cplan.getAttribute('data-want');
+      if (want && hasOption(cplan, want)) cplan.value = want;
     }
     applyQueryPlan();
+  }
+
+  function hasOption(select, v) {
+    return Array.prototype.some.call(select.options, function (o) { return o.value === v; });
+  }
+  function query(name) {
+    try { return new URLSearchParams(window.location.search).get(name); } catch (e) { return null; }
+  }
+  function contactUrl(params) {
+    var q = Object.keys(params).filter(function (k) { return params[k]; })
+      .map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+    return 'contact.html' + (q ? '?' + q : '');
   }
 
   function applyQueryPlan() {
     var select = $('#f-plan');
     if (!select) return;
-    try {
-      var q = new URLSearchParams(window.location.search);
-      var want = q.get('plan') || q.get('service');
-      if (want && Array.prototype.some.call(select.options, function (o) { return o.value === want; })) select.value = want;
-    } catch (e) { /* ignoré */ }
+    var want = query('plan') || query('service');
+    if (want && hasOption(select, want)) select.value = want;
   }
 
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest ? e.target.closest('[data-plan],[data-service]') : null;
-    var select = $('#f-plan');
-    if (!t || !select) return;
-    var v = t.getAttribute('data-plan') || t.getAttribute('data-service');
-    if (Array.prototype.some.call(select.options, function (o) { return o.value === v; })) select.value = v;
-    var similar = t.getAttribute('data-similar');
-    var box = $('#f-message');
-    if (similar && box && !box.value.trim()) box.value = 'Je souhaite un site similaire à ' + similar + ' pour mon activité : ';
-  });
+  /* Anciens liens de l'accueil (#contact, #tarifs, ?plan=…) : redirection vers les nouvelles pages */
+  (function legacyLinks() {
+    var page = location.pathname.split('/').pop();
+    if (page && page !== 'index.html') return;
+    var plan = query('plan') || query('service');
+    var map = { '#contact': 'contact.html', '#tarifs': 'digital.html#tarifs', '#frais': 'digital.html#frais',
+      '#digital': 'digital.html', '#media': 'media.html', '#artist': 'artist-management.html',
+      '#events': 'evenements.html', '#fondateur': 'a-propos.html#fondateur', '#galerie': 'realisations.html#videos' };
+    if (plan) { location.replace(contactUrl({ plan: plan })); return; }
+    if (map[location.hash]) location.replace(map[location.hash]);
+  })();
 
-  /* Galerie : vidéos, recaps, événements (masquée tant qu'elle est vide) */
-  var KIND = { video: 'Vidéo', recap: 'Recap', event: 'Événement', photo: 'Photo' };
+  /* Galeries vidéo : chaque bloc [data-gallery] choisit ses types (data-kinds) et sa limite (data-limit).
+     Le bloc parent [data-gallery-section] reste masqué tant qu'aucune vidéo n'est publiée. */
+  var KIND = { video: 'Vidéo promotionnelle', recap: 'Recap d\'événement', event: 'Couverture d\'événement', photo: 'Photo' };
   function renderGallery() {
-    var sec = $('#galerie');
-    var root = $('#gallery-list');
-    if (!sec || !root || !D) return;
-    var items = (D.gallery || []).filter(function (g) { return g.published; }).sort(function (a, b) { return a.order - b.order; });
+    if (!D) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-gallery]'), renderGalleryBox);
+  }
+  function renderGalleryBox(root) {
+    var sec = root.closest('[data-gallery-section]') || root;
+    var kinds = (root.getAttribute('data-kinds') || '').split(',').filter(Boolean);
+    var items = (D.gallery || []).filter(function (g) { return g.published && (!kinds.length || kinds.indexOf(g.kind) !== -1); })
+      .sort(function (a, b) { return a.order - b.order; });
     if (!items.length) { sec.hidden = true; return; }
     sec.hidden = false;
     root.textContent = '';
-    var limit = window.innerWidth < 640 ? 3 : 6;
-    var more = $('#gallery-more');
+    var max = parseInt(root.getAttribute('data-limit'), 10) || 8;
+    var limit = window.innerWidth < 640 ? Math.min(max, 4) : max;
+    var more = root.parentNode.querySelector('.gallery-more');
     if (more) more.remove();
     items.forEach(function (g, idx) {
       var art = el('article', 'gitem');
@@ -237,8 +265,8 @@
       root.appendChild(art);
     });
     if (items.length > limit) {
-      var btn = el('button', 'btn btn-ghost', 'Voir plus de vidéos');
-      btn.type = 'button'; btn.id = 'gallery-more'; btn.style.marginTop = '28px';
+      var btn = el('button', 'btn btn-ghost gallery-more', 'Voir plus de vidéos');
+      btn.type = 'button';
       btn.addEventListener('click', function () {
         Array.prototype.forEach.call(root.querySelectorAll('[data-extra]'), function (n) { n.hidden = false; });
         btn.remove();
@@ -255,12 +283,14 @@
   }
   var CATEGORY_PLAN = { 'landing page': 'landing', 'site vitrine': 'vitrine', 'site professionnel': 'professionnel',
     'e-commerce': 'ecommerce', 'boutique e-commerce': 'ecommerce', 'site premium': 'premium', 'site avec ia': 'ia' };
-  function planFor(cat) { return CATEGORY_PLAN[String(cat || '').toLowerCase().trim()] || 'autre'; }
+  function planFor(cat) { return CATEGORY_PLAN[String(cat || '').toLowerCase().trim()] || ''; }
   function renderProjects() {
     var root = $('#projects-list');
     if (!root || !D) return;
     var items = D.projects.filter(function (p) { return p.published; })
       .sort(function (a, b) { return a.order - b.order; });
+    var max = parseInt(root.getAttribute('data-limit'), 10);
+    if (max) items = items.slice(0, max);
     if (!items.length) return;
     root.textContent = '';
     items.forEach(function (p) {
@@ -298,9 +328,8 @@
         a.href = u; a.target = '_blank'; a.rel = 'noopener';
         acts.appendChild(a);
       }
-      var sim = el('a', 'btn btn-primary btn-small', 'Créer un site similaire');
-      sim.href = '#contact';
-      sim.setAttribute('data-plan', planFor(p.category));
+      var sim = el('a', 'btn btn-primary btn-small', 'Un projet similaire');
+      sim.href = contactUrl({ plan: planFor(p.category), similar: p.title });
       sim.setAttribute('data-similar', p.title);
       acts.appendChild(sim);
       body.appendChild(acts);
@@ -309,18 +338,46 @@
     });
   }
 
-  /* Menu mobile */
+  /* Menu mobile et sous-menu « Expertises » */
   function initNav() {
     var btn = $('.nav-toggle');
     var nav = $('#nav');
-    if (!btn || !nav) return;
-    function close() { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
-    btn.addEventListener('click', function () {
-      var open = nav.classList.toggle('open');
-      btn.setAttribute('aria-expanded', String(open));
+    var subBtn = $('.nav-sub-btn');
+    var sub = $('#nav-sub');
+    function closeSub() { if (sub) { sub.classList.remove('open'); subBtn.setAttribute('aria-expanded', 'false'); } }
+    function close() { if (nav) nav.classList.remove('open'); if (btn) btn.setAttribute('aria-expanded', 'false'); closeSub(); }
+    if (subBtn && sub) {
+      subBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = sub.classList.toggle('open');
+        subBtn.setAttribute('aria-expanded', String(open));
+      });
+      document.addEventListener('click', function (e) { if (!e.target.closest('.has-sub')) closeSub(); });
+    }
+    if (btn && nav) {
+      btn.addEventListener('click', function () {
+        var open = nav.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      nav.addEventListener('click', function (e) { if (e.target.closest('a')) close(); });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      var wasOpen = sub && sub.classList.contains('open');
+      close();
+      if (wasOpen) subBtn.focus();
     });
-    nav.addEventListener('click', function (e) { if (e.target.closest('a')) close(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+
+  /* Apparition douce des blocs au défilement */
+  function initReveal() {
+    var items = document.querySelectorAll('.reveal');
+    if (!items.length) return;
+    if (!('IntersectionObserver' in window)) { Array.prototype.forEach.call(items, function (n) { n.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    Array.prototype.forEach.call(items, function (n) { io.observe(n); });
   }
 
   /* Enregistre la demande dans la base. Résultat : { ok: true } ou { ok: false, reason } */
@@ -352,18 +409,46 @@
     } catch (e) { return Promise.resolve({ ok: false }); }
   }
 
-  /* Formulaire de devis de l'accueil : on enregistre d'abord, puis on propose WhatsApp */
+  /* Formulaire « Présenter un projet » (contact.html) : on enregistre d'abord, puis on propose WhatsApp */
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  /* Anciennes valeurs d'URL (?plan=media, ?service=events…) vers les types de projet */
+  var TYPE_ALIAS = { artist: 'musique', music: 'musique', media: 'media', events: 'evenement', event: 'evenement', digital: 'digital' };
+  function selectedText(select) { return select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : ''; }
+
   function initForm() {
-    var form = $('#quote-form');
+    var form = $('#project-form');
     if (!form || !D) return;
-    var wa = $('#link-whatsapp');
-    if (wa) wa.href = 'https://wa.me/' + D.contact.whatsapp;
+    var f = form.elements;
     var msg = $('#form-msg');
-    var btn = $('#quote-submit');
-    var done = $('#quote-done');
+    var btn = $('#project-submit');
+    var done = $('#project-done');
+    var planField = $('#c-plan-field');
     var loadedAt = Date.now();
-    function setMsg(text, kind) { msg.textContent = ''; msg.className = 'form-msg' + (kind ? ' ' + kind : ''); if (text) msg.textContent = text; }
+    var branchTouched = false;
+
+    function syncType() {
+      var opt = f.type.options[f.type.selectedIndex];
+      var b = opt ? opt.getAttribute('data-branch') : '';
+      if (!branchTouched && b && hasOption(f.branch, b)) f.branch.value = b;
+      if (planField) planField.hidden = !(f.type.value === 'digital' || f.branch.value === 'digital');
+    }
+    f.type.addEventListener('change', syncType);
+    f.branch.addEventListener('change', function () { branchTouched = true; syncType(); });
+
+    /* Préremplissage depuis l'URL : ?type=, ?branche=, ?plan=, ?similar= */
+    var t = query('type'), br = query('branche'), plan = query('plan') || query('service'), similar = query('similar');
+    if (plan && TYPE_ALIAS[plan]) { t = t || TYPE_ALIAS[plan]; plan = null; }
+    if (plan && plan !== 'autre') t = t || 'digital';
+    if (t && hasOption(f.type, t)) f.type.value = t;
+    syncType();
+    if (br && hasOption(f.branch, br)) { f.branch.value = br; branchTouched = true; syncType(); }
+    if (plan) {
+      f.plan.setAttribute('data-want', plan);
+      if (hasOption(f.plan, plan)) f.plan.value = plan;
+    }
+    if (similar && !f.message.value) f.message.value = 'Je souhaite un projet similaire à ' + similar.slice(0, 80) + ' pour mon activité : ';
+
+    function setMsg(text, kind) { msg.className = 'form-msg' + (kind ? ' ' + kind : ''); msg.textContent = text || ''; }
     function fail(text, field) {
       setMsg(text, 'err');
       if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
@@ -372,54 +457,58 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var f = form.elements;
       var name = f.name.value.trim();
       var phone = f.phone.value.trim();
       var email = f.email.value.trim();
-      var plan = f.plan;
-      var planLabel = plan.options[plan.selectedIndex] ? plan.options[plan.selectedIndex].text : '';
-      var budget = f.budget.value.trim();
+      var typeLabel = f.type.value ? selectedText(f.type) : '';
+      var branchLabel = f.branch.value ? selectedText(f.branch) : '';
+      var planOpt = f.plan.options[f.plan.selectedIndex];
+      var planName = (planField && !planField.hidden && f.plan.value && planOpt) ? (planOpt.getAttribute('data-name') || planOpt.text) : '';
+      var budget = f.budget.value;
       var deadline = f.deadline.value;
       var message = f.message.value.trim();
-      var features = Array.prototype.filter.call(form.querySelectorAll('input[name="feature"]'), function (c) { return c.checked; })
-        .map(function (c) { return c.value; }).join(', ').slice(0, 1000);
 
       if (!name) return fail('Indiquez votre nom ou celui de votre entreprise.', f.name);
       if (!phone && !email) return fail('Indiquez un numéro de téléphone ou WhatsApp, ou une adresse e-mail.', f.phone);
       if (phone && phone.replace(/\D/g, '').length < 8) return fail('Ce numéro semble incomplet. Vérifiez-le.', f.phone);
       if (email && !EMAIL_RE.test(email)) return fail('Cette adresse e-mail semble invalide.', f.email);
-      if (!message) return fail('Décrivez votre besoin en quelques lignes.', f.message);
+      if (!typeLabel) return fail('Choisissez le type de projet.', f.type);
+      if (message.length < 10) return fail('Décrivez votre besoin en quelques phrases.', f.message);
+      if (!deadline) return fail('Indiquez le délai souhaité (ou « Pas de date précise »).', f.deadline);
       if (f.website && f.website.value) return;
       if (Date.now() - loadedAt < 2500) return fail('Merci de patienter quelques secondes avant d\'envoyer.');
 
+      var service = (typeLabel + (planName ? ' · ' + planName : '')).slice(0, 80);
       var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
-        'Prestation souhaitée : ' + planLabel + '.\n' +
+        'Type de projet : ' + service + '.\n' +
+        (branchLabel ? 'Branche concernée : ' + branchLabel + '.\n' : '') +
         'Mon besoin : ' + message +
-        (features ? '\nFonctionnalités recherchées : ' + features : '') +
         (budget ? '\nBudget indicatif : ' + budget : '') +
-        (deadline ? '\nDélai souhaité : ' + deadline : '') +
+        '\nDélai souhaité : ' + deadline +
         (phone ? '\nMon numéro : ' + phone : '') +
         (email ? '\nMon e-mail : ' + email : '');
       var waUrl = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
 
       btn.disabled = true;
       setMsg('Enregistrement de votre demande…');
-      saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
-        budget: budget || null, deadline: deadline || null, features: features || null, message: message }).then(function (res) {
+      saveLead({ name: name, phone: phone || null, email: email || null, service: service,
+        budget: budget || null, deadline: deadline, message: message.slice(0, 1500),
+        comments: branchLabel ? 'Branche concernée : ' + branchLabel : null }).then(function (res) {
         btn.disabled = false;
         if (res.ok) {
-          track('quote_request', planLabel);
+          track('quote_request', service);
           setMsg('');
-          $('#quote-wa').href = waUrl;
+          $('#project-wa').href = waUrl;
           form.hidden = true;
           done.hidden = false;
           done.focus();
           form.reset();
+          branchTouched = false;
+          syncType();
           return;
         }
         /* Échec : on le dit clairement et on garde la saisie ; WhatsApp reste possible avec le message prêt */
-        msg.className = 'form-msg err';
-        msg.textContent = (res.reason || 'Votre demande n\'a pas pu être enregistrée (connexion ou serveur indisponible).') + ' ';
+        setMsg((res.reason || 'Votre demande n\'a pas pu être enregistrée (connexion ou serveur indisponible).') + ' ', 'err');
         if (!res.reason) {
           var a = el('a', null, 'Envoyez-la sur WhatsApp');
           a.href = waUrl; a.target = '_blank'; a.rel = 'noopener';
@@ -429,12 +518,9 @@
       });
     });
 
-    var again = $('#quote-again');
-    if (again) again.addEventListener('click', function () { done.hidden = true; form.hidden = false; loadedAt = Date.now(); f0(); });
-    function f0() { var n = form.elements.name; if (n) n.focus(); }
+    var again = $('#project-again');
+    if (again) again.addEventListener('click', function () { done.hidden = true; form.hidden = false; loadedAt = Date.now(); f.name.focus(); });
   }
-
-
 
   /* Page dédiée : demande client complète (lien partageable) */
   function initRequestForm() {
@@ -586,7 +672,7 @@
       track('social_click', /instagram/.test(href) ? 'Instagram' : 'Snapchat');
     } else if (href.indexOf('mailto:') === 0) {
       track('social_click', 'Email');
-    } else if (href.slice(-8) === '#contact') {
+    } else if (/^contact\.html/.test(href)) {
       track('cta_click', a.textContent);
     }
   });
@@ -667,6 +753,7 @@
   }
 
   initNav();
+  initReveal();
   initForm();
   initRequestForm();
   initConsent();
