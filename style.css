@@ -421,3 +421,5 @@ a.pcard-shot:hover img{opacity:.92}
 }
 .founder-link{margin-bottom:32px}
 .founder-link p{color:var(--mute);font-size:.98rem;max-width:64ch}
+.founder-main p+p{margin-top:16px}
+.founder-main p.founder-end{color:var(--ink);margin-top:22px}
