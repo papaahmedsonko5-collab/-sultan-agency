@@ -49,30 +49,55 @@
     if (!D) return;
     var root = $('#pricing-list');
     var plansRoot = $('#plans');
+    var compare = $('#compare-body');
     var select = $('#f-plan');
     var all = D.pricing.filter(function (p) { return p.active; }).sort(function (a, b) { return a.order - b.order; });
     var plans = all.filter(function (p) { return catOf(p) === 'site'; });
     var packs = all.filter(function (p) { return catOf(p) !== 'site'; });
+    var excl = (D.exclusions || []).join('\n');
 
-    if (root) {
+    /* Accueil : cartes de tarifs (le HTML statique reste en place si aucune formule n'est disponible) */
+    if (root && plans.length) {
       root.textContent = '';
       plans.forEach(function (p) {
-        var li = el('li', 'price-row');
-        var name = el('div', 'p-name');
-        name.appendChild(el('h3', null, p.name));
-        if (p.badge) name.appendChild(el('span', 'badge', p.badge));
-        li.appendChild(name);
-        li.appendChild(el('p', 'p-desc', p.description));
-        li.appendChild(el('p', 'price-val', priceLabel(p)));
-        var a = el('a', 'btn btn-ghost btn-small p-cta', 'Demander ce devis');
+        var art = el('article', p.badge ? 'pc pc-hl' : 'pc');
+        var h = el('h3', null, p.name);
+        if (p.badge) { h.appendChild(document.createTextNode(' ')); h.appendChild(el('span', 'badge', p.badge)); }
+        art.appendChild(h);
+        art.appendChild(el('p', 'pc-price', priceLabel(p)));
+        if (p.description) art.appendChild(el('p', 'pc-desc', p.description));
+        if (p.audience) art.appendChild(el('p', 'pc-who', p.audience));
+        var a = el('a', p.badge ? 'btn btn-primary btn-small' : 'btn btn-ghost btn-small', 'Demander ce devis');
         a.href = '#contact';
         a.setAttribute('data-plan', p.id);
-        li.appendChild(a);
-        root.appendChild(li);
+        art.appendChild(a);
+        root.appendChild(art);
       });
     }
 
-    if (plansRoot) {
+    /* Page des formules : tableau comparatif */
+    if (compare && plans.length) {
+      compare.textContent = '';
+      plans.forEach(function (p) {
+        var tr = el('tr');
+        var th = el('th', null, p.name);
+        th.setAttribute('scope', 'row');
+        if (p.badge) { th.appendChild(document.createTextNode(' ')); th.appendChild(el('span', 'badge', p.badge)); }
+        tr.appendChild(th);
+        tr.appendChild(el('td', null, priceLabel(p)));
+        tr.appendChild(el('td', null, p.audience || p.description || ''));
+        var td = el('td');
+        var a = el('a', 'btn btn-ghost btn-small', 'Devis');
+        a.href = 'index.html?plan=' + encodeURIComponent(p.id) + '#contact';
+        a.setAttribute('data-plan', p.id);
+        td.appendChild(a);
+        tr.appendChild(td);
+        compare.appendChild(tr);
+      });
+    }
+
+    /* Page des formules : détail de chaque formule */
+    if (plansRoot && plans.length) {
       plansRoot.textContent = '';
       plans.forEach(function (p) {
         var art = el('article', 'plan');
@@ -88,6 +113,7 @@
         infoBlock(dl, 'Objectifs du site', p.goals, false);
         infoBlock(dl, 'Fonctionnalités incluses', p.features, true);
         infoBlock(dl, 'Limites de la formule', p.limits, false);
+        infoBlock(dl, 'Non inclus dans le prix de départ', excl, true);
         infoBlock(dl, 'Options possibles', p.options, true);
         if (dl.children.length) art.appendChild(dl);
         var a = el('a', 'btn btn-primary', 'Demander un devis');
@@ -114,23 +140,27 @@
       });
     });
 
-    if (select) {
+    if (select && plans.length) {
+      var current = select.value;
       select.textContent = '';
       plans.forEach(function (p) { var o = el('option', null, p.name); o.value = p.id; select.appendChild(o); });
       BRANCHES.forEach(function (b) { var o = el('option', null, b.label); o.value = b.id; select.appendChild(o); });
       var other = el('option', null, 'Autre besoin ou je ne sais pas encore');
       other.value = 'autre';
       select.appendChild(other);
-      try {
-        var q = new URLSearchParams(window.location.search);
-        var want = q.get('plan') || q.get('service');
-        if (want && Array.prototype.some.call(select.options, function (o) { return o.value === want; })) {
-          select.value = want;
-          var c = document.getElementById('contact');
-          if (c && window.location.hash === '#contact') c.scrollIntoView();
-        }
-      } catch (e) { /* ignoré */ }
+      if (current && Array.prototype.some.call(select.options, function (o) { return o.value === current; })) select.value = current;
     }
+    applyQueryPlan();
+  }
+
+  function applyQueryPlan() {
+    var select = $('#f-plan');
+    if (!select) return;
+    try {
+      var q = new URLSearchParams(window.location.search);
+      var want = q.get('plan') || q.get('service');
+      if (want && Array.prototype.some.call(select.options, function (o) { return o.value === want; })) select.value = want;
+    } catch (e) { /* ignoré */ }
   }
 
   document.addEventListener('click', function (e) {
@@ -196,49 +226,55 @@
     }
   }
 
-  /* Réalisations */
+  /* Réalisations : cartes avec capture d'écran (le HTML statique sert de secours sans JavaScript) */
+  function shotFor(p) {
+    if (p.image && safeUrl(p.image)) return safeUrl(p.image);
+    var key = String(p.title || '').toLowerCase().trim();
+    return (D.shots && D.shots[key]) || null;
+  }
   function renderProjects() {
     var root = $('#projects-list');
     if (!root || !D) return;
-    root.textContent = '';
     var items = D.projects.filter(function (p) { return p.published; })
       .sort(function (a, b) { return a.order - b.order; });
-    if (!items.length) {
-      root.appendChild(el('p', 'empty', 'Les réalisations arrivent bientôt.'));
-      return;
-    }
+    if (!items.length) return;
+    root.textContent = '';
     items.forEach(function (p) {
-      var art = el('article', 'project');
-      var mark;
-      if (p.image && safeUrl(p.image)) {
-        mark = el('div', 'project-mark');
-        var img = document.createElement('img');
-        img.src = safeUrl(p.image);
-        img.alt = 'Aperçu du site ' + p.title;
-        img.loading = 'lazy';
-        img.width = 96; img.height = 96;
-        mark.appendChild(img);
-      } else {
-        mark = el('div', 'project-mark', initials(p.title));
-        mark.setAttribute('aria-hidden', 'true');
-      }
-      art.appendChild(mark);
-
-      var body = el('div');
-      body.appendChild(el('h3', null, p.title));
-      body.appendChild(el('p', null, p.description));
-      var meta = el('div', 'project-meta');
-      meta.appendChild(el('span', null, p.category));
-      meta.appendChild(el('span', 'status', p.status));
-      body.appendChild(meta);
-      art.appendChild(body);
-
+      var art = el('article', 'pcard');
       var u = p.url ? safeUrl(p.url) : null;
+      var shot = el(u ? 'a' : 'div', 'pcard-shot');
+      if (u) {
+        shot.href = u; shot.target = '_blank'; shot.rel = 'noopener';
+        shot.setAttribute('aria-label', 'Ouvrir le site ' + p.title + ' (nouvel onglet)');
+      }
+      var host = '';
+      try { host = u ? new URL(u).hostname.replace(/^www\./, '') : p.title; } catch (e) { host = p.title; }
+      shot.appendChild(el('span', 'pcard-ph', host));
+      var src = shotFor(p);
+      if (src) {
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Capture d\'écran de la page d\'accueil de ' + p.title;
+        img.width = 1280; img.height = 800;
+        img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('error', function () { img.remove(); });
+        shot.appendChild(img);
+      }
+      art.appendChild(shot);
+
+      var body = el('div', 'pcard-body');
+      if (p.category) body.appendChild(el('p', 'pcard-type', p.category));
+      body.appendChild(el('h3', null, p.title));
+      if (p.description) body.appendChild(el('p', null, p.description));
+      if (p.status && p.status !== 'Terminé') body.appendChild(el('p', 'pcard-status', p.status));
       if (u) {
         var a = el('a', 'btn btn-ghost btn-small', 'Voir le site');
         a.href = u; a.target = '_blank'; a.rel = 'noopener';
-        art.appendChild(a);
+        body.appendChild(a);
+      } else if (/sultan agency/i.test(p.title)) {
+        body.appendChild(el('p', 'pcard-here', 'Vous êtes dessus.'));
       }
+      art.appendChild(body);
       root.appendChild(art);
     });
   }
@@ -257,23 +293,36 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
-  /* Enregistre la demande dans la base (en plus de WhatsApp) */
+  /* Enregistre la demande dans la base. Résultat : { ok: true } ou { ok: false, reason } */
+  var DB_ERRORS = [
+    [/telephone ou un e-mail/i, 'Indiquez un numéro de téléphone ou une adresse e-mail.'],
+    [/telephone invalide/i, 'Ce numéro semble incomplet. Vérifiez-le.'],
+    [/e-mail invalide/i, 'Cette adresse e-mail semble invalide.'],
+    [/trop de demandes/i, 'Beaucoup de demandes en ce moment. Réessayez dans quelques minutes ou écrivez-nous sur WhatsApp.']
+  ];
   function saveLead(lead) {
-    if (!D || !D.api || !D.api.url || !window.fetch) return Promise.resolve(false);
+    if (!D || !D.api || !D.api.url || !window.fetch) return Promise.resolve({ ok: false });
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 15000) : null;
     try {
       return fetch(D.api.url + '/rest/v1/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': D.api.key, 'Prefer': 'return=minimal' },
         body: JSON.stringify(lead),
-        keepalive: true
+        signal: ctrl ? ctrl.signal : undefined
       }).then(function (r) {
-        if (r.ok) return true;
-        return r.text().then(function (t) { return /deja recue/i.test(t); });
-      }).catch(function () { return false; });
-    } catch (e) { return Promise.resolve(false); }
+        if (timer) clearTimeout(timer);
+        if (r.ok) return { ok: true };
+        return r.text().then(function (t) {
+          if (/deja recue/i.test(t)) return { ok: true, duplicate: true };
+          for (var i = 0; i < DB_ERRORS.length; i++) if (DB_ERRORS[i][0].test(t)) return { ok: false, reason: DB_ERRORS[i][1] };
+          return { ok: false };
+        });
+      }).catch(function () { if (timer) clearTimeout(timer); return { ok: false }; });
+    } catch (e) { return Promise.resolve({ ok: false }); }
   }
 
-  /* Formulaire de devis : enregistre la demande puis ouvre WhatsApp */
+  /* Formulaire de devis de l'accueil : on enregistre d'abord, puis on propose WhatsApp */
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function initForm() {
     var form = $('#quote-form');
@@ -281,7 +330,15 @@
     var wa = $('#link-whatsapp');
     if (wa) wa.href = 'https://wa.me/' + D.contact.whatsapp;
     var msg = $('#form-msg');
-    function fail(text, field) { msg.style.color = ''; msg.textContent = text; if (field) field.focus(); }
+    var btn = $('#quote-submit');
+    var done = $('#quote-done');
+    var loadedAt = Date.now();
+    function setMsg(text, kind) { msg.textContent = ''; msg.className = 'form-msg' + (kind ? ' ' + kind : ''); if (text) msg.textContent = text; }
+    function fail(text, field) {
+      setMsg(text, 'err');
+      if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+    }
+    form.addEventListener('input', function (e) { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -300,11 +357,8 @@
       if (phone && phone.replace(/\D/g, '').length < 8) return fail('Ce numéro semble incomplet. Vérifiez-le.', f.phone);
       if (email && !EMAIL_RE.test(email)) return fail('Cette adresse e-mail semble invalide.', f.email);
       if (!message) return fail('Décrivez votre besoin en quelques lignes.', f.message);
-      msg.style.color = '';
-      msg.textContent = '';
-
-      var hp = f.website;
-      if (hp && hp.value) return;
+      if (f.website && f.website.value) return;
+      if (Date.now() - loadedAt < 2500) return fail('Merci de patienter quelques secondes avant d\'envoyer.');
 
       var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
         'Prestation souhaitée : ' + planLabel + '.\n' +
@@ -313,27 +367,38 @@
         (deadline ? '\nDélai souhaité : ' + deadline : '') +
         (phone ? '\nMon numéro : ' + phone : '') +
         (email ? '\nMon e-mail : ' + email : '');
+      var waUrl = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
 
-      var saving = saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
-        budget: budget || null, deadline: deadline || null, message: message });
-      track('quote_request', planLabel);
-
-      var url = 'https://wa.me/' + D.contact.whatsapp + '?text=' + encodeURIComponent(text);
-      var w = window.open(url, '_blank', 'noopener');
-      if (!w) window.location.href = url;
-      msg.style.color = '';
-      msg.textContent = 'Envoi en cours...';
-      saving.then(function (ok) {
-        if (ok) {
-          msg.style.color = '#7fcf9a';
-          msg.textContent = 'Demande enregistrée. Finalisez-la dans WhatsApp si la fenêtre s\'est ouverte.';
+      btn.disabled = true;
+      setMsg('Enregistrement de votre demande…');
+      saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
+        budget: budget || null, deadline: deadline || null, message: message }).then(function (res) {
+        btn.disabled = false;
+        if (res.ok) {
+          track('quote_request', planLabel);
+          setMsg('');
+          $('#quote-wa').href = waUrl;
+          form.hidden = true;
+          done.hidden = false;
+          done.focus();
           form.reset();
-        } else {
-          msg.style.color = '';
-          msg.textContent = 'Votre demande n\'a pas pu être enregistrée. Envoyez le message WhatsApp prêt à l\'emploi pour que nous la recevions.';
+          return;
+        }
+        /* Échec : on le dit clairement et on garde la saisie ; WhatsApp reste possible avec le message prêt */
+        msg.className = 'form-msg err';
+        msg.textContent = (res.reason || 'Votre demande n\'a pas pu être enregistrée (connexion ou serveur indisponible).') + ' ';
+        if (!res.reason) {
+          var a = el('a', null, 'Envoyez-la sur WhatsApp');
+          a.href = waUrl; a.target = '_blank'; a.rel = 'noopener';
+          msg.appendChild(a);
+          msg.appendChild(document.createTextNode(' (message déjà rédigé) ou réessayez dans un instant.'));
         }
       });
     });
+
+    var again = $('#quote-again');
+    if (again) again.addEventListener('click', function () { done.hidden = true; form.hidden = false; loadedAt = Date.now(); f0(); });
+    function f0() { var n = form.elements.name; if (n) n.focus(); }
   }
 
 
@@ -378,11 +443,11 @@
 
       btn.disabled = true;
       msg.textContent = 'Envoi en cours...';
-      saveLead(lead).then(function (ok) {
+      saveLead(lead).then(function (res) {
         btn.disabled = false;
-        if (!ok) {
+        if (!res.ok) {
           msg.style.color = '';
-          msg.textContent = 'Votre demande n\'a pas pu être enregistrée. Réessayez dans un instant, ou écrivez-nous directement sur WhatsApp.';
+          msg.textContent = res.reason || 'Votre demande n\'a pas pu être enregistrée. Réessayez dans un instant, ou écrivez-nous directement sur WhatsApp.';
           var alt = $('#req-fallback');
           alt.href = waLink('Bonjour Sultan Agency, je suis ' + name + '. ' + planLabel + ' : ' + message);
           alt.hidden = false;

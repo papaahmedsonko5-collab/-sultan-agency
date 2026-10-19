@@ -285,3 +285,141 @@ p{max-width:62ch}
 @media (max-width:700px){.req-form{grid-template-columns:1fr}}
 
 [hidden]{display:none !important}
+
+/* ---------- Améliorations octobre 2026 ---------- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.nav-list a.nav-cta{color:#0a0a0a}
+.nav-list a.nav-cta:hover{color:#0a0a0a}
+.eyebrow{font:500 .82rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-2);margin-bottom:18px}
+.hero-note{margin-top:22px;color:var(--mute);font-size:.9rem}
+
+/* Branches */
+.branch-tag{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-2);margin-bottom:8px}
+.branch.main{border:1px solid var(--gold);border-top-width:2px;background:var(--bg-2);padding:clamp(22px,4vw,40px)}
+.branch.main h3{font-size:clamp(1.7rem,3.4vw,2.2rem)}
+.branch-who{margin-top:12px;font-size:.93rem;color:var(--mute)}
+.branch-who strong{color:var(--ink);font-weight:500}
+.branch-grid .branch h3{font-size:1.3rem}
+
+/* Tarifs : cartes comparables */
+.price-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,22px)}
+.pc{border:1px solid var(--line);background:var(--bg-2);padding:22px;display:flex;flex-direction:column;gap:8px}
+.pc-hl{border-color:var(--gold)}
+.pc h3{font-size:1.3rem}
+.pc .badge{margin-left:6px}
+.pc-price{font:700 1.2rem var(--serif);color:var(--gold-2)}
+.pc-desc{color:var(--mute);font-size:.95rem}
+.pc-who{font-size:.88rem;color:var(--ink)}
+.pc .btn{margin-top:auto;align-self:flex-start}
+.price-terms{margin-top:28px;border:1px solid var(--line);padding:20px 22px}
+.price-terms h3{font-size:1.15rem}
+.price-terms .tick{margin:14px 0 0}
+.price-terms strong{font-weight:500}
+.price-terms a{color:var(--gold-2)}
+
+/* Tableau comparatif */
+.table-scroll{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:clamp(32px,5vw,56px);border:1px solid var(--line)}
+.compare{width:100%;border-collapse:collapse;min-width:560px;font-size:.95rem}
+.compare th,.compare td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.compare thead th{font:500 .8rem var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.compare tbody th{font:700 1.02rem var(--serif)}
+.compare td:nth-child(2){white-space:nowrap;color:var(--gold-2);font-weight:700}
+.compare td:nth-child(3){color:var(--mute)}
+.compare tbody tr:last-child th,.compare tbody tr:last-child td{border-bottom:0}
+
+/* Réalisations : cartes avec capture */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,28px)}
+.pcard{border:1px solid var(--line);background:var(--bg-2);display:flex;flex-direction:column}
+.pcard-shot{position:relative;display:block;aspect-ratio:16/10;background:#14140f;border-bottom:1px solid var(--line);overflow:hidden;text-decoration:none}
+.pcard-ph{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;font:700 1.1rem var(--serif);color:var(--gold)}
+.pcard-shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+a.pcard-shot:hover img{opacity:.92}
+.pcard-body{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.pcard-type{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-2)}
+.pcard h3{font-size:1.35rem}
+.pcard-body>p:not(.pcard-type):not(.pcard-here){color:var(--mute);font-size:.95rem}
+.pcard-body .btn{margin-top:auto;align-self:flex-start}
+.pcard-here,.pcard-status{margin-top:auto;font-size:.88rem;color:var(--gold-2)}
+
+/* Parcours en 10 étapes */
+.steps-10{grid-template-columns:repeat(5,1fr)}
+.steps-10 li::before{font-size:1.3rem}
+.steps-10 strong{font-size:1.02rem}
+.steps-10 p{font-size:.9rem}
+
+/* Formulaire */
+.form-req{color:var(--mute);font-size:.88rem}
+.field small{color:var(--mute);font-size:.82rem}
+.field [aria-invalid="true"]{border-color:#ff9b8a}
+.form-msg.err{color:#ff9b8a}
+.form-msg a{color:var(--gold-2)}
+.form-noscript{border:1px solid var(--gold);padding:16px;margin-bottom:18px}
+.form-noscript a{color:var(--gold-2)}
+#quote-done h3{font-size:clamp(1.4rem,3vw,1.8rem);margin-bottom:10px}
+#quote-done:focus{outline:none}
+.contact-intro a{color:var(--gold-2)}
+.btn:disabled{opacity:.6;cursor:wait}
+.field input,.field select,.field textarea,.req-form .field input,.req-form .field select,.req-form .field textarea{font-size:16px}
+
+@media (max-width:960px){
+  .price-cards,.pgrid{grid-template-columns:repeat(2,1fr)}
+  .steps-10{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:640px){
+  .price-cards,.pgrid{grid-template-columns:1fr}
+  .steps-10{grid-template-columns:repeat(2,1fr)}
+  .pc .btn,.pcard-body .btn{align-self:stretch}
+}
+
+/* ---------- Fondateur et appel à l'action (octobre 2026, 2) ---------- */
+.btn-lg{padding:16px 30px;font-size:1.05rem;font-weight:700}
+.header-cta{display:none;margin-left:auto}
+.site-header .header-cta{color:#0a0a0a}
+.founder .wrap{grid-template-columns:300px 1fr}
+.founder-side{display:grid;gap:16px;align-content:start;position:sticky;top:100px}
+.founder-side .founder-cta{width:300px}
+.founder-main h2{margin-bottom:6px}
+.founder-role{color:var(--gold-2);font-size:1rem;margin-bottom:24px}
+.founder-quote{border-left:2px solid var(--gold);padding:4px 0 4px 22px;margin:0 0 32px}
+.founder-quote p{color:var(--ink);font:italic 400 1.05rem/1.7 var(--serif);max-width:64ch}
+.founder-quote p+p{margin-top:14px}
+.founder-main h3{font-size:1.2rem;margin:0 0 14px}
+.founder-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,48px);margin-bottom:32px}
+.founder-cols p{color:var(--mute);font-size:.95rem}
+.founder-cols .chips+h3{margin-top:24px}
+.timeline{border-left:1px solid var(--line);padding-left:18px;display:grid;gap:16px}
+.timeline li{position:relative}
+.timeline li::before{content:"";position:absolute;left:-23px;top:.45em;width:9px;height:9px;background:var(--gold)}
+.timeline strong{display:block;font-weight:500;color:var(--ink);line-height:1.4}
+.timeline span{display:block;font-size:.88rem;color:var(--mute)}
+.timeline .tl-kind{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips li{border:1px solid var(--line);padding:6px 12px;font-size:.88rem;color:var(--ink)}
+.founder-branches{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.founder-branches a{display:block;height:100%;border:1px solid var(--line);padding:14px 16px;text-decoration:none}
+.founder-branches a:hover{border-color:var(--gold)}
+.founder-branches strong{display:block;font:700 1.05rem var(--serif);margin-bottom:4px}
+.founder-branches span{display:block;color:var(--mute);font-size:.9rem}
+.founder-branches .fb-main{grid-column:1 / -1}
+.founder-branches .fb-main a{border-color:var(--gold);background:var(--bg-2)}
+.founder-branches .fb-main strong{color:var(--gold-2);font-size:1.2rem}
+.founder-end a{color:var(--gold-2)}
+.founder p.founder-end{color:var(--mute);margin-top:0}
+@media (max-width:860px){
+  .header-cta{display:inline-block}
+  .site-header .wrap{gap:12px}
+  .nav-list li:last-child{display:none}
+  .founder .wrap{grid-template-columns:1fr}
+  .founder-side{position:static;grid-template-columns:1fr;justify-items:start}
+  .founder-cols{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .founder-side .founder-cta{width:100%}
+  .founder-branches{grid-template-columns:1fr}
+  .site-header .logo{font-size:1.1rem}
+  .header-cta{padding:8px 12px;font-size:.82rem}
+}
+.founder-link{margin-bottom:32px}
+.founder-link p{color:var(--mute);font-size:.98rem;max-width:64ch}
+.founder-main p+p{margin-top:16px}
+.founder-main p.founder-end{color:var(--ink);margin-top:22px}

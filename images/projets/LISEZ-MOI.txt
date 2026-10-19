@@ -1,0 +1,6 @@
+Captures d'écran du portfolio (format 16:10, 1280 x 800, en .jpg) :
+  keur-yaye-rokhaya.jpg   -> https://keuryayerokhaya.com/
+  talla-graphique.jpg     -> https://tallaniang.com/
+  sultan-agency.jpg       -> page d'accueil de ce site, après publication
+Tant qu'un fichier manque, la carte affiche le nom du site à la place (aucune fausse image).
+On peut aussi renseigner une adresse d'image par projet dans admin.html (champ image) : elle est prioritaire.
