@@ -13,6 +13,14 @@
   }
   function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
   function priceLabel(p) { return p.priceLabel || ('À partir de ' + fmt(p.price) + '\u00a0FCFA'); }
+  function priceBlock(p, cls) {
+    var n = el('p', cls);
+    if (p.priceLabel || !(p.price > 0)) { n.textContent = priceLabel(p); return n; }
+    n.appendChild(el('span', 'price-from', 'À partir de'));
+    n.appendChild(document.createTextNode(' '));
+    n.appendChild(el('span', 'price-amount', fmt(p.price) + '\u00a0FCFA'));
+    return n;
+  }
   function initials(t) {
     return t.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
   }
@@ -64,10 +72,16 @@
         var h = el('h3', null, p.name);
         if (p.badge) { h.appendChild(document.createTextNode(' ')); h.appendChild(el('span', 'badge', p.badge)); }
         art.appendChild(h);
-        art.appendChild(el('p', 'pc-price', priceLabel(p)));
+        art.appendChild(priceBlock(p, 'pc-price'));
         if (p.description) art.appendChild(el('p', 'pc-desc', p.description));
+        var feats = lines(p.features);
+        if (feats.length) {
+          var ul = el('ul', 'plan-list pc-feats');
+          feats.forEach(function (t) { ul.appendChild(el('li', null, t)); });
+          art.appendChild(ul);
+        }
         if (p.audience) art.appendChild(el('p', 'pc-who', p.audience));
-        var a = el('a', p.badge ? 'btn btn-primary btn-small' : 'btn btn-ghost btn-small', 'Demander ce devis');
+        var a = el('a', p.badge ? 'btn btn-primary' : 'btn btn-ghost', 'Demander un devis');
         a.href = '#contact';
         a.setAttribute('data-plan', p.id);
         art.appendChild(a);
@@ -84,10 +98,14 @@
         th.setAttribute('scope', 'row');
         if (p.badge) { th.appendChild(document.createTextNode(' ')); th.appendChild(el('span', 'badge', p.badge)); }
         tr.appendChild(th);
-        tr.appendChild(el('td', null, priceLabel(p)));
-        tr.appendChild(el('td', null, p.audience || p.description || ''));
+        var tdPrice = el('td', null, priceLabel(p));
+        tdPrice.setAttribute('data-label', 'Prix de départ');
+        tr.appendChild(tdPrice);
+        var tdWho = el('td', null, p.audience || p.description || '');
+        tdWho.setAttribute('data-label', 'Idéal pour');
+        tr.appendChild(tdWho);
         var td = el('td');
-        var a = el('a', 'btn btn-ghost btn-small', 'Devis');
+        var a = el('a', 'btn btn-ghost btn-small', 'Demander un devis');
         a.href = 'index.html?plan=' + encodeURIComponent(p.id) + '#contact';
         a.setAttribute('data-plan', p.id);
         td.appendChild(a);
@@ -106,7 +124,7 @@
         head.appendChild(el('h2', null, p.name));
         if (p.badge) head.appendChild(el('span', 'badge', p.badge));
         art.appendChild(head);
-        art.appendChild(el('p', 'plan-price', priceLabel(p)));
+        art.appendChild(priceBlock(p, 'plan-price'));
         if (p.description) art.appendChild(el('p', 'plan-desc', p.description));
         var dl = el('dl', 'plan-info');
         infoBlock(dl, 'Pour qui', p.audience, false);
@@ -169,6 +187,9 @@
     if (!t || !select) return;
     var v = t.getAttribute('data-plan') || t.getAttribute('data-service');
     if (Array.prototype.some.call(select.options, function (o) { return o.value === v; })) select.value = v;
+    var similar = t.getAttribute('data-similar');
+    var box = $('#f-message');
+    if (similar && box && !box.value.trim()) box.value = 'Je souhaite un site similaire à ' + similar + ' pour mon activité : ';
   });
 
   /* Galerie : vidéos, recaps, événements (masquée tant qu'elle est vide) */
@@ -232,6 +253,9 @@
     var key = String(p.title || '').toLowerCase().trim();
     return (D.shots && D.shots[key]) || null;
   }
+  var CATEGORY_PLAN = { 'landing page': 'landing', 'site vitrine': 'vitrine', 'site professionnel': 'professionnel',
+    'e-commerce': 'ecommerce', 'boutique e-commerce': 'ecommerce', 'site premium': 'premium', 'site avec ia': 'ia' };
+  function planFor(cat) { return CATEGORY_PLAN[String(cat || '').toLowerCase().trim()] || 'autre'; }
   function renderProjects() {
     var root = $('#projects-list');
     if (!root || !D) return;
@@ -267,13 +291,19 @@
       body.appendChild(el('h3', null, p.title));
       if (p.description) body.appendChild(el('p', null, p.description));
       if (p.status && p.status !== 'Terminé') body.appendChild(el('p', 'pcard-status', p.status));
+      if (!u && /sultan agency/i.test(p.title)) body.appendChild(el('p', 'pcard-here', 'Vous êtes dessus.'));
+      var acts = el('div', 'pcard-actions');
       if (u) {
         var a = el('a', 'btn btn-ghost btn-small', 'Voir le site');
         a.href = u; a.target = '_blank'; a.rel = 'noopener';
-        body.appendChild(a);
-      } else if (/sultan agency/i.test(p.title)) {
-        body.appendChild(el('p', 'pcard-here', 'Vous êtes dessus.'));
+        acts.appendChild(a);
       }
+      var sim = el('a', 'btn btn-primary btn-small', 'Créer un site similaire');
+      sim.href = '#contact';
+      sim.setAttribute('data-plan', planFor(p.category));
+      sim.setAttribute('data-similar', p.title);
+      acts.appendChild(sim);
+      body.appendChild(acts);
       art.appendChild(body);
       root.appendChild(art);
     });
@@ -351,6 +381,8 @@
       var budget = f.budget.value.trim();
       var deadline = f.deadline.value;
       var message = f.message.value.trim();
+      var features = Array.prototype.filter.call(form.querySelectorAll('input[name="feature"]'), function (c) { return c.checked; })
+        .map(function (c) { return c.value; }).join(', ').slice(0, 1000);
 
       if (!name) return fail('Indiquez votre nom ou celui de votre entreprise.', f.name);
       if (!phone && !email) return fail('Indiquez un numéro de téléphone ou WhatsApp, ou une adresse e-mail.', f.phone);
@@ -363,6 +395,7 @@
       var text = 'Bonjour Sultan Agency, je suis ' + name + '.\n' +
         'Prestation souhaitée : ' + planLabel + '.\n' +
         'Mon besoin : ' + message +
+        (features ? '\nFonctionnalités recherchées : ' + features : '') +
         (budget ? '\nBudget indicatif : ' + budget : '') +
         (deadline ? '\nDélai souhaité : ' + deadline : '') +
         (phone ? '\nMon numéro : ' + phone : '') +
@@ -372,7 +405,7 @@
       btn.disabled = true;
       setMsg('Enregistrement de votre demande…');
       saveLead({ name: name, phone: phone || null, email: email || null, service: planLabel,
-        budget: budget || null, deadline: deadline || null, message: message }).then(function (res) {
+        budget: budget || null, deadline: deadline || null, features: features || null, message: message }).then(function (res) {
         btn.disabled = false;
         if (res.ok) {
           track('quote_request', planLabel);
@@ -543,8 +576,8 @@
     var a = e.target.closest ? e.target.closest('a') : null;
     if (!a) return;
     var href = a.getAttribute('href') || '';
-    var proj = a.closest('.project');
-    if (proj) {
+    var proj = a.closest('.project, .pcard');
+    if (proj && !a.hasAttribute('data-similar')) {
       var h = proj.querySelector('h3');
       track('project_view', h ? h.textContent : '');
     } else if (href.indexOf('wa.me') !== -1) {
