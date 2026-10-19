@@ -74,5 +74,15 @@ window.SULTAN = {
     { id: 'sultan-agency', title: 'Sultan Agency', category: 'Site vitrine', status: 'Terminé',
       description: 'Le site de l\'agence, avec demandes de devis enregistrées et tableau de bord privé.', url: null, image: null, published: true, order: 3 }
   ],
-  gallery: []
+  /* Vidéos réelles (mêmes entrées que la table gallery de la base) */
+  gallery: [
+    { title: 'Concert live', kind: 'recap', url: 'video-concert-live.mp4', image: 'poster-concert-live.jpg', published: true, order: 2 },
+    { title: 'Fresco Fest, Rufisque', kind: 'recap', url: 'video-fresco-fest.mp4', image: 'poster-fresco-fest.jpg', published: true, order: 3 },
+    { title: 'Concert', kind: 'event', url: 'video-concert.mp4', image: 'poster-concert.jpg', published: true, order: 4 },
+    { title: 'Recap 2026 New Year', kind: 'recap', url: 'video-recap-new-year-2026.mp4', image: 'poster-recap-new-year-2026.jpg', published: true, order: 5 },
+    { title: 'Restaurant', kind: 'video', url: 'video-restaurant.mp4', image: 'poster-restaurant.jpg', published: true, order: 6 },
+    { title: 'Recap soirée live', kind: 'recap', url: 'video-recap-soiree-live.mp4', image: 'poster-recap-soiree-live.jpg', published: true, order: 7 },
+    { title: '72H ISCOM', kind: 'event', url: 'video-72h-iscom.mp4', image: 'poster-72h-iscom.jpg', published: true, order: 8 },
+    { title: 'Sortie', kind: 'video', url: 'video-sortie.mp4', image: 'poster-sortie.jpg', published: true, order: 9 }
+  ]
 };
