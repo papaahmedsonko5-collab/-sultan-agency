@@ -370,6 +370,29 @@
     });
   }
 
+  /* Boucle vidéo de l'ouverture : chargée seulement sur grand écran, sans économiseur de données
+     ni préférence « réduire les animations ». Sinon, l'image fixe (poster) reste affichée. */
+  function initOpeningVideo() {
+    var v = document.querySelector('video[data-src]');
+    if (!v) return;
+    var btn = v.parentNode.querySelector('.play-toggle');
+    var saveData = navigator.connection && navigator.connection.saveData;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var wide = window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
+    if (saveData || calm || !wide) return;
+    v.src = v.getAttribute('data-src');
+    var p = v.play();
+    if (p && p.catch) p.catch(function () { /* lecture automatique refusée : le poster reste */ });
+    if (!btn) return;
+    /* Le bouton suit l'état réel de la vidéo et disparaît si elle ne peut pas être lue */
+    v.addEventListener('playing', function () { btn.hidden = false; btn.textContent = 'Pause'; });
+    v.addEventListener('pause', function () { btn.textContent = 'Lecture'; });
+    v.addEventListener('error', function () { btn.hidden = true; });
+    btn.addEventListener('click', function () {
+      if (v.paused) { var q = v.play(); if (q && q.catch) q.catch(function () {}); } else { v.pause(); }
+    });
+  }
+
   /* Apparition douce des blocs au défilement */
   function initReveal() {
     var items = document.querySelectorAll('.reveal');
@@ -755,6 +778,7 @@
 
   initNav();
   initReveal();
+  initOpeningVideo();
   initForm();
   initRequestForm();
   initConsent();
