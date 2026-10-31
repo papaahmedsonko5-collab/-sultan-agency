@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /dashboard.html
 Disallow: /admin/
+Disallow: /outils/
 
 Sitemap: https://papaahmedsonko5-collab.github.io/-sultan-agency/sitemap.xml

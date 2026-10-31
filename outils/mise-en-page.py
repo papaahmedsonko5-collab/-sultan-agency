@@ -21,16 +21,16 @@ PAGES = {
 }
 
 POLES = [
+    ('evenements.html', 'Sultan Events', 'Concerts, soirées, lancements et expériences'),
     ('artist-management.html', 'Sultan Artist Management', "Management d'artistes et musique"),
     ('media.html', 'Sultan Media', 'Communication, contenus et vidéo'),
     ('digital.html', 'Sultan Digital', 'Sites web, plateformes et automatisation'),
-    ('evenements.html', 'Sultan Events', 'Concerts, soirées, lancements et expériences'),
 ]
 
 WHATSAPP = 'https://wa.me/221781482035'
 LOGO = ('<a class="logo" href="{p}index.html" aria-label="Sultan Agency, accueil">'
         '<span class="logo-mark" aria-hidden="true">SA</span>'
-        '<span class="logo-word">Sultan Agency<small>Agence créative &amp; entrepreneuriale</small></span></a>')
+        '<span class="logo-word">Sultan Agency<small>Événements · Création · Dakar</small></span></a>')
 
 
 def cur(page, cible):
@@ -55,10 +55,11 @@ def entete(page, p):
         <li><a href="{p}realisations.html"{cur(page, 'realisations.html')}>Réalisations</a></li>
         <li><a href="{p}a-propos.html"{cur(page, 'a-propos.html')}>À propos</a></li>
         <li><a href="{p}contact.html"{cur(page, 'contact.html')}>Contact</a></li>
-        <li><a class="btn btn-primary btn-small nav-cta" href="{p}contact.html">Présenter mon projet</a></li>
+        <li><a class="nav-wa" href="{WHATSAPP}" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a class="btn btn-primary btn-small nav-cta" href="{p}contact.html">Votre projet</a></li>
       </ul>
     </nav>
-    <a class="btn btn-primary btn-small header-cta" href="{p}contact.html">Mon projet</a>
+    <a class="btn btn-primary btn-small header-cta" href="{p}contact.html">Votre projet</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>'''
@@ -68,11 +69,11 @@ def pied(page, p):
     poles = '\n'.join(f'          <li><a href="{p}{f}">{n}</a></li>' for f, n, _ in POLES)
     return f'''<footer class="site-footer">
   <div class="wrap">
+    <p class="footer-sign"><span>Vivre,</span> <span>partager,</span> <span class="it">vibrer.</span></p>
     <div class="footer-grid">
       <div class="footer-brand">
         {LOGO.format(p=p)}
-        <p class="footer-sign">De l'idée à l'impact.</p>
-        <p>Agence créative et entrepreneuriale basée à Dakar, Sénégal. Ouverte aux collaborations au Sénégal et à l'international.</p>
+        <p>Agence événementielle et créative basée à Dakar. Concerts, soirées, lancements, artistes, image et digital, au Sénégal et au-delà.</p>
       </div>
       <div class="footer-col">
         <h2>Expertises</h2>
@@ -112,8 +113,7 @@ def pied(page, p):
       </nav>
     </div>
   </div>
-</footer>
-<a class="wa-float" href="{WHATSAPP}" target="_blank" rel="noopener" aria-label="Écrire à Sultan Agency sur WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3z"/></svg><span>WhatsApp</span></a>'''
+</footer>'''
 
 
 def main():
