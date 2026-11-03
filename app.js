@@ -287,8 +287,10 @@
   function renderProjects() {
     var root = $('#projects-list');
     if (!root || !D) return;
+    /* Le site de l'agence elle-même passe après les sites des clients */
+    function isSelf(p) { return !p.url && /sultan agency/i.test(p.title || ''); }
     var items = D.projects.filter(function (p) { return p.published; })
-      .sort(function (a, b) { return a.order - b.order; });
+      .sort(function (a, b) { return (isSelf(a) - isSelf(b)) || (a.order - b.order); });
     var max = parseInt(root.getAttribute('data-limit'), 10);
     if (max) items = items.slice(0, max);
     if (!items.length) return;
