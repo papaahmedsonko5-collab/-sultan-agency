@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0d0c0b">
+<title>Quote Studio | Sultan Agency</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../../fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+<a class="skip" href="#app">Aller au contenu</a>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#/" aria-label="Quote Studio, tableau de bord">
+      <span class="mark" aria-hidden="true">SA</span>
+      <span class="word">Sultan Agency<small>Quote Studio · usage interne</small></span>
+    </a>
+    <nav class="bar-nav" aria-label="Navigation de l'outil">
+      <a href="#/" data-nav="dashboard">Tableau de bord</a>
+      <a href="#/reglages" data-nav="settings">Réglages</a>
+      <a class="btn btn-gold" href="#/nouveau">Nouveau devis</a>
+    </nav>
+  </div>
+</header>
+
+<p class="storage-alert" id="storage-alert" hidden>Le stockage de ce navigateur est indisponible (navigation privée ?) : vos devis ne seront pas conservés. Exportez une sauvegarde avant de fermer la page.</p>
+
+<main id="app" tabindex="-1"></main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<noscript><p class="noscript">Le Quote Studio a besoin de JavaScript.</p></noscript>
+
+<script src="calc.js"></script>
+<script src="catalogue.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="vendor/polices-pdf.js"></script>
+<script src="document.js"></script>
+<script src="pdf.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

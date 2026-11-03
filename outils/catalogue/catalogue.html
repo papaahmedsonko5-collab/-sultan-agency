@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>Sultan Agency — Présentation &amp; Catalogue des Services 2026-2027</title>
+<!-- Source du catalogue PDF. Pour régénérer le PDF : ouvrir ce fichier dans Chrome,
+     Imprimer › Enregistrer au format PDF, marges « Aucune », « Graphiques d'arrière-plan » cochés.
+     Les prix sont lus dans ../quote-studio/catalogue.js (source unique, partagée avec le Quote Studio). -->
+<style>
+@font-face{font-family:'Archivo';font-style:normal;font-weight:100 900;font-stretch:62% 125%;src:url(../../fonts/archivo-variable.woff2) format('woff2-variations'),url(../../fonts/archivo-variable.woff2) format('woff2')}
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;src:url(../../fonts/instrument-serif-italic.woff2) format('woff2')}
+@page{size:A4;margin:0}
+:root{--nuit:#0d0c0b;--nuit-2:#161412;--ivoire:#efe8dc;--champ:#f8f4ec;--encre:#17130f;--mute:#5c554b;--line:#cbc0ad;--or:#c9a24a;--bronze:#7a5b17;--clair:#f4efe6;--gris:#a7a094}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#7d766b}
+body{font:400 10pt/1.5 'Archivo',Arial,sans-serif;color:var(--encre);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{position:relative;width:210mm;height:297mm;overflow:hidden;margin:0 auto 10mm;background:var(--ivoire);padding:18mm 18mm 22mm;page-break-after:always;break-after:page}
+.page:last-child{page-break-after:auto;break-after:auto}
+@media print{html,body{background:none}.page{margin:0}}
+.dark{background:var(--nuit);color:var(--clair)}
+.white{background:#fff}
+h1,h2,h3,h4{font-weight:800;font-stretch:66%;text-transform:uppercase;line-height:.92;letter-spacing:-.003em}
+h2{font-size:34pt;margin:5mm 0 6mm;max-width:150mm}
+h2 .it,h1 .it{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;text-transform:none;font-stretch:100%;color:var(--bronze)}
+.dark h1 .it,.dark h2 .it{color:var(--or)}
+h3{font-size:14pt;font-stretch:72%;line-height:1}
+.it{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400}
+.rub{display:flex;align-items:center;gap:4mm;font:600 7pt 'Archivo';letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+.rub::after{content:"";flex:1;height:.3mm;background:var(--line)}
+.dark .rub{color:var(--or)}.dark .rub::after{background:#2e2a25}
+.lead{font-size:12pt;line-height:1.45;max-width:150mm}
+.mute{color:var(--mute)}
+.dark .mute{color:var(--gris)}
+p+p{margin-top:3mm}
+.foot{position:absolute;left:18mm;right:18mm;bottom:10mm;display:flex;justify-content:space-between;font:500 6.6pt 'Archivo';letter-spacing:.16em;text-transform:uppercase;color:var(--mute);border-top:.3mm solid var(--line);padding-top:3mm}
+.dark .foot{color:var(--gris);border-color:#2e2a25}
+.mark{display:inline-grid;place-items:center;width:13mm;height:13mm;border:.5mm solid var(--or);color:var(--or);font:800 12pt 'Archivo';font-stretch:78%}
+.brand{display:flex;align-items:center;gap:4mm}
+.brand b{font:800 15pt/1 'Archivo';font-stretch:72%;letter-spacing:.08em;text-transform:uppercase}
+.brand small{display:block;font:500 6.6pt 'Archivo';letter-spacing:.22em;text-transform:uppercase;color:var(--gris);margin-top:1.2mm}
+
+/* Couverture */
+.cover{display:flex;flex-direction:column;justify-content:space-between;padding:20mm}
+.cover .frame{position:absolute;inset:9mm;border:.3mm solid #3a3328;pointer-events:none}
+.cover h1{font-size:62pt;line-height:.84;font-stretch:62%;margin-top:30mm}
+.cover h1 span{display:block}
+.cover .title{margin-top:14mm;border-top:.4mm solid var(--or);padding-top:6mm;display:grid;grid-template-columns:1fr auto;gap:6mm;align-items:end}
+.cover .title p{font:600 9pt 'Archivo';letter-spacing:.2em;text-transform:uppercase;color:var(--clair);max-width:none}
+.cover .title strong{display:block;font:800 26pt/1 'Archivo';font-stretch:66%;letter-spacing:0;margin-top:2mm}
+.cover .year{font:800 40pt/1 'Archivo';font-stretch:62%;color:var(--or)}
+.cover .base{display:flex;justify-content:space-between;align-items:flex-end;font:500 7pt 'Archivo';letter-spacing:.2em;text-transform:uppercase;color:var(--gris)}
+.live::before{content:"";display:inline-block;width:2mm;height:2mm;border-radius:50%;background:#e0452b;margin-right:2.4mm;vertical-align:.2mm}
+
+/* Grilles éditoriales */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10mm}
+.list{border-top:.3mm solid var(--line)}
+.list li{list-style:none;display:grid;grid-template-columns:12mm 1fr;gap:3mm;padding:3.4mm 0;border-bottom:.3mm solid var(--line)}
+.list li::before{content:counter(i,decimal-leading-zero);counter-increment:i;font:600 7pt 'Archivo';letter-spacing:.16em;color:var(--bronze);padding-top:1mm}
+.list{counter-reset:i}
+.list strong{display:block;font:800 11.5pt 'Archivo';font-stretch:72%;text-transform:uppercase;margin-bottom:1mm}
+.list p{font-size:8.8pt;color:var(--mute)}
+.values{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:.3mm solid var(--line);margin-top:6mm}
+.values div{padding:4mm 4mm 4mm 0;border-bottom:.3mm solid var(--line)}
+.values div:not(:nth-child(3n+1)){padding-left:4mm;border-left:.3mm solid var(--line)}
+.values b{display:block;font:400 16pt/1 'Instrument Serif';font-style:italic;color:var(--bronze);margin-bottom:1.5mm}
+.values p{font-size:8.4pt;color:var(--mute)}
+.refs{margin-top:7mm;background:var(--champ);padding:5mm 6mm;border-left:.8mm solid var(--or)}
+.refs h4{font:600 7pt 'Archivo';letter-spacing:.2em;color:var(--bronze);margin-bottom:2mm}
+.refs ul{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+.refs img{display:block;width:100%;height:62mm;object-fit:cover;object-position:top;margin-bottom:3mm;border:.3mm solid var(--line)}
+.refs b{display:block;font:800 10.5pt 'Archivo';font-stretch:72%;text-transform:uppercase}
+.refs span{font-size:8pt;color:var(--mute)}
+
+/* Domaines */
+.domains{display:grid;grid-template-columns:1fr 1fr;border-top:.4mm solid var(--encre)}
+.domains div{padding:5mm 5mm 5mm 0;border-bottom:.3mm solid var(--line);min-height:36mm}
+.domains div:nth-child(even){padding-left:5mm;border-left:.3mm solid var(--line)}
+.domains i{font:600 7pt 'Archivo';font-style:normal;letter-spacing:.16em;color:var(--bronze)}
+.domains h3{margin:1.5mm 0 2mm}
+.domains p{font-size:8.8pt;color:var(--mute)}
+
+/* Catalogue des formules */
+.formula{display:grid;grid-template-columns:52mm 1fr 34mm;gap:6mm;padding:4.6mm 0;border-bottom:.3mm solid var(--line);align-items:start}
+.formula:first-of-type{border-top:.4mm solid var(--encre)}
+.formula h3{font-size:15pt}
+.formula .tag{display:inline-block;margin-top:2mm;padding:.6mm 2mm;border:.3mm solid var(--bronze);color:var(--bronze);font:600 6.4pt 'Archivo';letter-spacing:.16em;text-transform:uppercase}
+.formula .who{font-size:8pt;color:var(--mute);margin-top:2mm}
+.formula ul{list-style:none;display:grid;gap:1mm;font-size:8.6pt}
+.formula li{padding-left:4mm;position:relative}
+.formula li::before{content:"";position:absolute;left:0;top:2.2mm;width:2.2mm;height:.3mm;background:var(--bronze)}
+.formula .limit{font-size:7.8pt;color:var(--mute);margin-top:1.6mm}
+.price{text-align:right}
+.price small{display:block;font:600 6.4pt 'Archivo';letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.price b{display:block;font:800 17pt/1.05 'Archivo';font-stretch:64%}
+.services2{display:grid;grid-template-columns:1fr 1fr;gap:0 8mm;border-top:.4mm solid var(--encre)}
+.services2 div{padding:3.6mm 0;border-bottom:.3mm solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2mm 4mm}
+.services2 h4{font:800 10.5pt 'Archivo';font-stretch:72%;text-transform:uppercase}
+.services2 em{font:600 7pt 'Archivo';font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--bronze);white-space:nowrap}
+.services2 p{grid-column:1 / -1;font-size:8.3pt;color:var(--mute)}
+
+/* Tableaux de prix */
+table{width:100%;border-collapse:collapse}
+.tbl th{font:600 6.8pt 'Archivo';letter-spacing:.16em;text-transform:uppercase;color:var(--mute);text-align:left;padding:2.6mm 3mm;border-bottom:.4mm solid var(--encre)}
+.tbl td{padding:3.6mm 3mm;border-bottom:.3mm solid var(--line);vertical-align:middle;font-size:9.6pt}
+.tbl td.r,.tbl th.r{text-align:right}
+.tbl .n{font:800 12.5pt 'Archivo';font-stretch:70%;text-transform:uppercase}
+.tbl .v{font:800 14pt 'Archivo';font-stretch:64%;white-space:nowrap}
+.tbl .from{display:block;font:600 6.2pt 'Archivo';letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.tbl tr.pop td{background:#fff}
+.tbl tr.pop .n::after{content:"Populaire";display:inline-block;margin-left:3mm;padding:.5mm 2mm;background:var(--encre);color:var(--ivoire);font:600 6pt 'Archivo';letter-spacing:.16em;vertical-align:1mm}
+.note{margin-top:5mm;font-size:8.4pt;color:var(--mute);border-left:.8mm solid var(--or);padding:1mm 0 1mm 4mm}
+.bul{list-style:none;display:grid;gap:2.2mm;font-size:8.8pt}
+.bul li{padding-left:5mm;position:relative}
+.bul li::before{content:"";position:absolute;left:0;top:1.8mm;width:1.6mm;height:1.6mm;background:var(--or)}
+.box{background:#fff;padding:6mm;margin-top:6mm}
+.box h4{font:600 7pt 'Archivo';letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);margin-bottom:3mm}
+
+/* Méthode */
+.steps{counter-reset:s;border-top:.4mm solid var(--encre)}
+.steps li{list-style:none;counter-increment:s;display:grid;grid-template-columns:22mm 1fr;gap:4mm;padding:5mm 0;border-bottom:.3mm solid var(--line)}
+.steps li::before{content:counter(s,decimal-leading-zero);font:800 26pt/1 'Archivo';font-stretch:62%;color:var(--bronze)}
+.steps strong{display:block;font:800 13pt 'Archivo';font-stretch:72%;text-transform:uppercase;margin-bottom:1.4mm}
+.steps p{font-size:9pt;color:var(--mute)}
+
+/* Conditions */
+.cond{list-style:none;counter-reset:c;border-top:.4mm solid var(--encre)}
+.cond li{counter-increment:c;display:grid;grid-template-columns:12mm 1fr;padding:3.2mm 0;border-bottom:.3mm solid var(--line);font-size:9.4pt}
+.cond li::before{content:counter(c,decimal-leading-zero);font:600 7pt 'Archivo';letter-spacing:.16em;color:var(--bronze);padding-top:.8mm}
+.clause{margin-top:7mm;background:var(--nuit);color:var(--clair);padding:6mm 7mm}
+.clause h4{font:600 7pt 'Archivo';letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:2.5mm}
+.clause p{font-size:9pt;line-height:1.55}
+
+/* Fin */
+.end{display:flex;flex-direction:column;justify-content:space-between;padding:20mm}
+.end h2{font-size:52pt;line-height:.86;max-width:none;margin-top:20mm}
+.contacts{border-top:.4mm solid var(--or);margin-top:10mm}
+.contacts div{display:grid;grid-template-columns:45mm 1fr;padding:4mm 0;border-bottom:.3mm solid #2e2a25}
+.contacts dt{font:600 7pt 'Archivo';letter-spacing:.2em;text-transform:uppercase;color:var(--gris);padding-top:1mm}
+.contacts dd{font:500 12pt 'Archivo'}
+.sign{font:400 30pt/1 'Instrument Serif';font-style:italic;color:var(--or)}
+</style>
+</head>
+<body>
+
+<!-- 1. Couverture -->
+<section class="page dark cover">
+  <span class="frame" aria-hidden="true"></span>
+  <div class="brand"><span class="mark">SA</span><div><b>Sultan Agency</b><small>Solutions digitales &amp; créatives · Dakar</small></div></div>
+  <div>
+    <h1><span>Vivre,</span><span>partager,</span><span class="it">vibrer.</span></h1>
+    <div class="title">
+      <div><p>Présentation &amp; catalogue des services</p><strong>Sites web, plateformes, image et accompagnement digital</strong></div>
+      <div class="year">2026<br>—2027</div>
+    </div>
+  </div>
+  <div class="base"><span class="live">Dakar, Sénégal · Afrique de l'Ouest</span><span>Tarifs en francs CFA (XOF)</span></div>
+</section>
+
+<!-- 2. Présentation -->
+<section class="page">
+  <p class="rub">01 — Présentation</p>
+  <h2>Une agence à taille humaine, <span class="it">basée à Dakar.</span></h2>
+  <p class="lead">Sultan Agency conçoit les outils numériques et les contenus qui permettent aux particuliers, aux entrepreneurs, aux PME et aux grandes entreprises d'être vus, compris et contactés : sites web, plateformes, identité visuelle, communication et contenus photo et vidéo.</p>
+  <div class="cols" style="margin-top:9mm">
+    <div>
+      <p>L'agence a été fondée par <strong>Papa Ahmed Sonko</strong>. Son parcours mêle la vidéo, le management d'artistes, l'organisation d'événements et une formation en transit, transport et logistique : un regard de terrain sur ce qu'un client attend, et une rigueur d'organisation appliquée à chaque projet.</p>
+      <p>Le fondateur suit chaque dossier et reste votre interlocuteur, du premier échange à la mise en ligne.</p>
+    </div>
+    <div>
+      <p>Quand un projet demande une compétence ou un équipement spécifique, Sultan Agency s'entoure de collaborateurs choisis pour ce projet. Vous savez toujours qui intervient : c'est indiqué dans le devis.</p>
+      <p>Cette organisation permet de rester réactif, de maîtriser les coûts et de proposer une réponse complète, de la conception à l'accompagnement après la livraison.</p>
+    </div>
+  </div>
+  <div class="refs">
+    <h4>Sites réalisés, en ligne</h4>
+    <ul>
+      <li><img src="../../images/projets/keur-yaye-rokhaya.jpg" alt=""><b>Keur Yaye Rokhaya</b><span>Boutique e-commerce · keuryayerokhaya.com</span></li>
+      <li><img src="../../images/projets/talla-graphique.jpg" alt=""><b>Talla Graphique</b><span>Site professionnel · tallaniang.com</span></li>
+      <li><img src="../../images/projets/skm-la-fabrik.jpg" alt=""><b>SKM La Fabrik</b><span>Site officiel · skmlafabrik.com</span></li>
+    </ul>
+  </div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 3. Vision et approche -->
+<section class="page">
+  <p class="rub">02 — Vision et approche</p>
+  <h2>Des outils utiles, <span class="it">sans promesses en l'air.</span></h2>
+  <div class="cols">
+    <div>
+      <h3>Notre vision</h3>
+      <p style="margin-top:3mm">Faire de Sultan Agency une référence des solutions digitales et créatives au Sénégal et en Afrique de l'Ouest : des sites et des plateformes pensés pour le public d'ici, rapides sur téléphone, simples à utiliser et faciles à faire évoluer.</p>
+    </div>
+    <div>
+      <h3>Notre approche</h3>
+      <p style="margin-top:3mm">Chaque projet part d'un objectif concret : recevoir des demandes, vendre, informer, organiser. Nous proposons la solution la plus juste pour cet objectif, avec un devis écrit qui précise le contenu, le prix, le délai et ce qui n'est pas inclus.</p>
+    </div>
+  </div>
+  <div class="values">
+    <div><b>Clarté</b><p>Un devis écrit avant tout paiement, des prix de départ affichés, des frais techniques annoncés.</p></div>
+    <div><b>Mobile d'abord</b><p>La plupart de vos visiteurs arrivent depuis un téléphone : tout est conçu pour cet écran.</p></div>
+    <div><b>Sur mesure</b><p>Un design pensé pour votre activité, pas un modèle copié.</p></div>
+    <div><b>Un interlocuteur</b><p>Vous parlez à la personne qui pilote votre projet, du début à la fin.</p></div>
+    <div><b>Propriété</b><p>Votre domaine est à votre nom ; vos données et vos comptes vous appartiennent.</p></div>
+    <div><b>Durée</b><p>Nous préférons accompagner un projet dans le temps plutôt que livrer et disparaître.</p></div>
+  </div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 4. Domaines d'expertise -->
+<section class="page">
+  <p class="rub">03 — Nos domaines d'expertise</p>
+  <h2>Huit métiers, <span class="it">un seul interlocuteur.</span></h2>
+  <div class="domains">
+    <div><i>01</i><h3>Création de sites web</h3><p>Landing pages, sites vitrines et professionnels, boutiques e-commerce, sites premium et sites intégrant l'intelligence artificielle.</p></div>
+    <div><i>02</i><h3>Applications web et plateformes SaaS</h3><p>Espaces clients, réservation, tableaux de bord, outils internes et plateformes sur mesure.</p></div>
+    <div><i>03</i><h3>Solutions digitales pour entreprises</h3><p>Automatisation de processus, intégration d'outils et, lorsque c'est pertinent, de l'intelligence artificielle.</p></div>
+    <div><i>04</i><h3>Identité visuelle et design graphique</h3><p>Logo, charte graphique et déclinaisons pour les supports imprimés et numériques.</p></div>
+    <div><i>05</i><h3>Marketing digital et communication</h3><p>Stratégie de communication, campagnes de visibilité et accompagnement de l'image de marque.</p></div>
+    <div><i>06</i><h3>Gestion des réseaux sociaux</h3><p>Instagram, TikTok et autres plateformes : calendrier éditorial, publications, animation de la communauté.</p></div>
+    <div><i>07</i><h3>Contenus photo et vidéo</h3><p>Vidéos promotionnelles, recaps et aftermovies d'événements, contenus pensés pour chaque réseau.</p></div>
+    <div><i>08</i><h3>Maintenance et assistance technique</h3><p>Corrections, mises à jour, hébergement, nom de domaine et suivi technique après la mise en ligne.</p></div>
+  </div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 5. Catalogue détaillé (1/2) : sites web -->
+<section class="page">
+  <p class="rub">04 — Catalogue détaillé des prestations</p>
+  <h2>Création de <span class="it">sites web.</span></h2>
+  <div id="formulas"></div>
+  <p class="note">Les textes et photos sont fournis par le client, sauf mention contraire au devis. Le contenu exact de chaque formule est confirmé dans le devis écrit.</p>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 6. Catalogue détaillé (2/2) : autres prestations -->
+<section class="page">
+  <p class="rub">04 — Catalogue détaillé des prestations (suite)</p>
+  <h2>Image, contenus <span class="it">et solutions sur mesure.</span></h2>
+  <p class="lead mute" style="margin-bottom:6mm">Ces prestations dépendent fortement du volume, de la durée et des moyens nécessaires : elles font l'objet d'un devis personnalisé.</p>
+  <div class="services2" id="services2"></div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 7. Grille tarifaire -->
+<section class="page white">
+  <p class="rub">05 — Grille tarifaire</p>
+  <h2>Prix de départ, <span class="it">devis écrit.</span></h2>
+  <table class="tbl">
+    <thead><tr><th>Création de sites web</th><th>Idéal pour</th><th class="r">Prix de départ</th></tr></thead>
+    <tbody id="price-sites"></tbody>
+  </table>
+  <table class="tbl" style="margin-top:7mm">
+    <thead><tr><th>Autres domaines de services</th><th class="r">Tarif</th></tr></thead>
+    <tbody id="price-other"></tbody>
+  </table>
+  <p class="note">Montants en francs CFA (XOF). Les prix « à partir de » couvrent le périmètre décrit dans ce catalogue ; le prix final est fixé dans le devis écrit. Hébergement, nom de domaine, licences et services tiers ne sont pas inclus dans le prix de création.</p>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 8. Hébergement, domaines et services techniques -->
+<section class="page">
+  <p class="rub">06 — Hébergement, domaines et services techniques</p>
+  <h2>Votre site en ligne, <span class="it">géré pour vous.</span></h2>
+  <table class="tbl" style="background:#fff">
+    <thead><tr><th>Service</th><th>Ce qui est compris</th><th class="r">Tarif</th></tr></thead>
+    <tbody id="price-infra"></tbody>
+  </table>
+  <div class="box">
+    <h4>À savoir</h4>
+    <ul class="bul">
+      <li>Ces forfaits ne sont pas inclus dans le prix de création du site : ils sont facturés uniquement lorsque les services correspondants sont nécessaires au projet.</li>
+      <li>Le forfait Supabase de 50 USD par mois comprend l'abonnement Pro et le service de gestion technique de Sultan Agency. Le client reste propriétaire de son compte Supabase, de son projet et de ses données ; Sultan Agency assure la configuration et la gestion technique dans le cadre de son contrat.</li>
+      <li>L'hébergement Vercel est géré par Sultan Agency.</li>
+      <li>Le nom de domaine est enregistré au nom du client, qui peut en demander le transfert.</li>
+      <li>Les éventuels dépassements de consommation et les services tiers supplémentaires sont signalés au client et chiffrés séparément.</li>
+      <li>Les forfaits en dollars américains (USD) sont facturés au taux de change indiqué sur la facture.</li>
+    </ul>
+  </div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 9. Méthode -->
+<section class="page">
+  <p class="rub">07 — Notre méthode de travail</p>
+  <h2>De la demande <span class="it">à la mise en ligne.</span></h2>
+  <ol class="steps">
+    <li><div><strong>Échange</strong><p>Vous décrivez votre besoin par WhatsApp, par e-mail ou via le site. Nous précisons ensemble l'objectif, le public, le contenu et le délai souhaité.</p></div></li>
+    <li><div><strong>Devis écrit</strong><p>Vous recevez un devis détaillé : prestations, prix, délai, frais techniques éventuels, modalités de paiement. Il est valable 15 jours.</p></div></li>
+    <li><div><strong>Lancement</strong><p>Le projet démarre à la signature du devis et au paiement de l'acompte de 60 %. Vous transmettez les textes, photos et accès nécessaires.</p></div></li>
+    <li><div><strong>Conception et développement</strong><p>Structure des pages, design, puis développement, validés avec vous. Deux séries de corrections sont incluses.</p></div></li>
+    <li><div><strong>Tests et livraison</strong><p>Vérification sur téléphone et ordinateur, puis mise en ligne définitive après règlement du solde de 40 %.</p></div></li>
+    <li><div><strong>Accompagnement</strong><p>Hébergement, nom de domaine, maintenance et évolutions selon la formule choisie.</p></div></li>
+  </ol>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 10. Conditions commerciales -->
+<section class="page">
+  <p class="rub">08 — Nos conditions commerciales</p>
+  <h2>Des règles claires, <span class="it">dès le départ.</span></h2>
+  <ol class="cond">
+    <li>Devis valable 15 jours à compter de sa date d'émission.</li>
+    <li>Acompte de 60 % à la commande.</li>
+    <li>Solde de 40 % avant la livraison finale, pour les sites classiques.</li>
+    <li>Applications complexes : paiement par étapes, selon le calendrier convenu.</li>
+    <li>Deux séries de corrections incluses.</li>
+    <li>Toute fonctionnalité supplémentaire fait l'objet d'un devis complémentaire.</li>
+    <li>Hébergement, nom de domaine, licences et API sont facturés selon les besoins du projet.</li>
+    <li>Les délais de réalisation sont précisés dans chaque devis.</li>
+  </ol>
+  <div class="clause">
+    <h4>Clause de révision tarifaire</h4>
+    <p>Les tarifs des fournisseurs tiers et des services techniques peuvent évoluer. En cas d'augmentation des coûts de Vercel, Supabase, des registrars de domaines ou d'autres prestataires, le client sera informé préalablement de toute répercussion éventuelle sur ses tarifs. Toute modification sera communiquée avant son entrée en vigueur, avec indication du nouveau montant et de sa date d'application.</p>
+  </div>
+  <p class="foot"><span>Sultan Agency</span><span>Présentation &amp; catalogue 2026-2027</span></p>
+</section>
+
+<!-- 11. Appel à l'action -->
+<section class="page dark end">
+  <div class="brand"><span class="mark">SA</span><div><b>Sultan Agency</b><small>Solutions digitales &amp; créatives · Dakar</small></div></div>
+  <div>
+    <p class="rub">09 — Votre projet</p>
+    <h2>Un projet en tête&nbsp;? <span class="it">Parlons-en.</span></h2>
+    <p class="lead mute">Décrivez votre besoin en quelques lignes. Vous recevez une réponse personnelle, puis un devis écrit et détaillé.</p>
+    <dl class="contacts">
+      <div><dt>WhatsApp</dt><dd>+221 78 148 20 35</dd></div>
+      <div><dt>E-mail</dt><dd>papaahmedsonko5@gmail.com</dd></div>
+      <div><dt>Site</dt><dd>papaahmedsonko5-collab.github.io/-sultan-agency</dd></div>
+      <div><dt>Instagram</dt><dd>@sultan.experiences</dd></div>
+      <div><dt>Adresse</dt><dd>Dakar, Sénégal</dd></div>
+    </dl>
+  </div>
+  <div class="base" style="display:flex;justify-content:space-between;align-items:flex-end"><span class="sign">Vivre, partager, vibrer.</span><span class="mute" style="font:500 7pt 'Archivo';letter-spacing:.2em;text-transform:uppercase">Catalogue 2026-2027</span></div>
+</section>
+
+<script src="../quote-studio/calc.js"></script>
+<script src="../quote-studio/catalogue.js"></script>
+<script>
+(function () {
+  var C = window.SACalc, items = window.SACatalogue.items;
+  var by = function (id) { return items.filter(function (i) { return i.id === id; })[0]; };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  /* Contenu des formules : repris des fiches publiées sur le site (content.js), prix du catalogue officiel */
+  var F = [
+    { id: 'site-landing', who: 'Lancement d\'offre, événement, activité indépendante.', feats: ['1 page unique, adaptée au téléphone', 'Bouton WhatsApp et appel direct', 'Référencement de base (titre et description)'], limit: 'Une seule page.' },
+    { id: 'site-vitrine', who: 'Restaurants, hôtels, associations.', feats: ['Jusqu\'à 5 pages, adaptées au téléphone', 'Formulaire de contact et bouton WhatsApp', 'Liens vers vos réseaux sociaux', 'Référencement de base'], limit: 'Pas de boutique ni d\'espace client.' },
+    { id: 'site-pro', who: 'PME, professionnels, entrepreneurs.', feats: ['Jusqu\'à 8 pages, adaptées au téléphone', 'Contenu structuré et référencement de base', 'Formulaire de contact', 'Galerie ou portfolio de vos réalisations'], limit: 'Pas de vente en ligne. Fonctionnalités sur mesure : sur devis.' },
+    { id: 'site-ecommerce', who: 'Boutiques, vendeurs en ligne.', feats: ['Catalogue de produits', 'Prise de commande par WhatsApp ou formulaire', 'Mise en ligne de vos 30 premiers produits'], limit: 'Paiement en ligne (Wave, Orange Money, carte) : en option, frais du prestataire de paiement en plus.' },
+    { id: 'site-premium', who: 'Marques et entreprises qui veulent un site haut de gamme.', feats: ['Design entièrement sur mesure', 'Jusqu\'à 12 pages', 'Fonctionnalités avancées définies au devis (réservation, espace client, plusieurs langues…)'], limit: '' },
+    { id: 'site-ia', who: 'Entreprises qui veulent automatiser une partie de leur relation client.', feats: ['Assistant IA intégré à votre site, adapté à votre besoin', 'Réponses basées sur les informations de votre activité'], limit: 'Coût d\'utilisation du service d\'IA facturé à part, selon la consommation.' }
+  ];
+  document.getElementById('formulas').innerHTML = F.map(function (f) {
+    var it = by(f.id);
+    return '<div class="formula"><div><h3>' + esc(it.label) + '</h3>' + (it.popular ? '<span class="tag">Offre populaire</span>' : '') + '<p class="who">' + esc(f.who) + '</p></div>' +
+      '<div><ul>' + f.feats.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' + (f.limit ? '<p class="limit">' + esc(f.limit) + '</p>' : '') + '</div>' +
+      '<div class="price"><small>À partir de</small><b>' + esc(C.fmtXof(it.unitPrice)) + '</b></div></div>';
+  }).join('');
+  var other = items.filter(function (i) { return i.group === 'services'; }).concat([by('infra-maintenance')]);
+  document.getElementById('services2').innerHTML = other.map(function (i) {
+    return '<div><h4>' + esc(i.id === 'infra-maintenance' ? 'Maintenance et assistance technique' : i.label) + '</h4><em>Sur devis</em><p>' + esc(i.desc) + '</p></div>';
+  }).join('');
+  document.getElementById('price-sites').innerHTML = F.map(function (f) {
+    var it = by(f.id);
+    return '<tr' + (it.popular ? ' class="pop"' : '') + '><td class="n">' + esc(it.label) + '</td><td class="mute">' + esc(f.who) + '</td><td class="r"><span class="from">À partir de</span><span class="v">' + esc(C.fmtXof(it.unitPrice)) + '</span></td></tr>';
+  }).join('');
+  document.getElementById('price-other').innerHTML = other.map(function (i) {
+    return '<tr><td class="n" style="font-size:11pt">' + esc(i.id === 'infra-maintenance' ? 'Maintenance et assistance technique' : i.label) + '</td><td class="r"><span class="v" style="font-size:12pt">Sur devis</span></td></tr>';
+  }).join('');
+  document.getElementById('price-infra').innerHTML = ['infra-vercel', 'infra-supabase', 'infra-domaine'].map(function (id) {
+    var it = by(id);
+    return '<tr><td class="n" style="font-size:11pt;width:62mm">' + esc(it.label) + '</td><td class="mute" style="font-size:8.6pt">' + esc(it.desc) + '</td><td class="r"><span class="v">' + esc(C.fmtMoney(it.unitPrice, it.currency)) + '</span><span class="from">par ' + (it.recurrence === 'month' ? 'mois' : 'an') + '</span></td></tr>';
+  }).join('');
+})();
+</script>
+</body>
+</html>
