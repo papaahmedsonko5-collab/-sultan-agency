@@ -765,9 +765,15 @@
           category: r.category || 'site', audience: r.audience || '', goals: r.goals || '',
           features: r.features || '', limits: r.limits || '', options: r.options || '' };
       });
+      var localProjects = D.projects.filter(function (p) { return p.local; });
       D.projects = data[1].map(function (r) {
         return { id: r.id, title: r.title, category: r.category || '', description: r.description || '',
           status: PROJECT_STATUS[r.status] || r.status, url: r.url, image: r.image_url, published: true, order: r.sort_order };
+      });
+      /* Réalisations marquées « local » dans content.js : ajoutées tant que la base ne les contient pas */
+      localProjects.forEach(function (p) {
+        var known = D.projects.some(function (q) { return String(q.title).toLowerCase() === String(p.title).toLowerCase(); });
+        if (!known) D.projects.push(p);
       });
       D.gallery = data[2].map(function (r) {
         return { id: r.id, title: r.title, kind: r.kind, description: r.description || '', url: r.url,
