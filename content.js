@@ -71,6 +71,9 @@ window.SULTAN = {
       description: 'Boutique de produits Apple et smartphones à Dakar, avec commande sur WhatsApp.', url: 'https://keuryayerokhaya.com/', image: null, published: true, order: 1 },
     { id: 'talla-graphique', title: 'Talla Graphique', category: 'Site professionnel', status: 'Terminé',
       description: 'Site professionnel et portfolio d\'un photographe et film maker, avec réservation.', url: 'https://tallaniang.com/', image: null, published: true, order: 2 },
+    /* local: true = pas encore dans la base ; affichée aussi quand la base répond (à retirer une fois ajoutée dans admin.html) */
+    { id: 'skm-la-fabrik', title: 'SKM La Fabrik', category: 'Site professionnel', status: 'Terminé', local: true,
+      description: 'Site de SKM La Fabrik, structure de formation et de création musicale : production, beatmaking, mixage et mastering.', url: 'https://www.skmlafabrik.com/', image: null, published: true, order: 2.5 },
     { id: 'sultan-agency', title: 'Sultan Agency', category: 'Site vitrine', status: 'Terminé',
       description: 'Le site de l\'agence, avec demandes de devis enregistrées et tableau de bord privé.', url: null, image: null, published: true, order: 3 }
   ],
