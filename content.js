@@ -21,7 +21,10 @@ window.SULTAN = {
     'Services tiers payants (paiement en ligne, outils, API, IA) : selon le service',
     'Maintenance : facultative, facturée à part'
   ],
-  /* Tarifs de lancement Sultan Digital (octobre 2026) */
+  /* Affichage des prix sur le site public. false : toutes les formules affichent « Sur devis »,
+     même si la base contient des montants (ils restent visibles dans admin.html). */
+  showPrices: false,
+  /* Formules (les montants ne sont affichés que si showPrices vaut true) */
   pricing: [
     { id: 'landing', name: 'Landing page', price: 50000, priceLabel: null, badge: '', active: true, order: 1, category: 'site',
       description: 'Une page unique pour présenter une offre, un événement ou une activité.',

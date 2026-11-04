@@ -13,10 +13,11 @@
     return n;
   }
   function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
-  function priceLabel(p) { return p.priceLabel || ('À partir de ' + fmt(p.price) + '\u00a0FCFA'); }
+  function pricesHidden() { return !!(D && D.showPrices === false); }
+  function priceLabel(p) { return pricesHidden() ? 'Sur devis' : (p.priceLabel || ('À partir de ' + fmt(p.price) + '\u00a0FCFA')); }
   function priceBlock(p, cls) {
     var n = el('p', cls);
-    if (p.priceLabel || !(p.price > 0)) { n.textContent = priceLabel(p); return n; }
+    if (pricesHidden() || p.priceLabel || !(p.price > 0)) { n.textContent = priceLabel(p); return n; }
     n.appendChild(el('span', 'price-from', 'À partir de'));
     n.appendChild(document.createTextNode(' '));
     n.appendChild(el('span', 'price-amount', fmt(p.price) + '\u00a0FCFA'));
@@ -100,7 +101,7 @@
         if (p.badge) { th.appendChild(document.createTextNode(' ')); th.appendChild(el('span', 'badge', p.badge)); }
         tr.appendChild(th);
         var tdPrice = el('td', null, priceLabel(p));
-        tdPrice.setAttribute('data-label', 'Prix de départ');
+        tdPrice.setAttribute('data-label', pricesHidden() ? 'Tarif' : 'Prix de départ');
         tr.appendChild(tdPrice);
         var tdWho = el('td', null, p.audience || p.description || '');
         tdWho.setAttribute('data-label', 'Idéal pour');
@@ -152,7 +153,7 @@
         var d = el('div', 'pack');
         d.appendChild(el('strong', null, p.name));
         if (p.description) d.appendChild(el('p', null, p.description));
-        d.appendChild(el('span', 'pack-price', p.price > 0 || p.priceLabel ? priceLabel(p) : 'Sur devis'));
+        d.appendChild(el('span', 'pack-price', !pricesHidden() && (p.price > 0 || p.priceLabel) ? priceLabel(p) : 'Sur devis'));
         box.appendChild(d);
       });
     });
@@ -176,7 +177,7 @@
       var none = el('option', null, 'Pas encore défini');
       none.value = '';
       cplan.appendChild(none);
-      plans.forEach(function (p) { var o = el('option', null, p.name + ' (' + priceLabel(p).replace('À partir de', 'dès') + ')'); o.value = p.id; o.setAttribute('data-name', p.name); cplan.appendChild(o); });
+      plans.forEach(function (p) { var o = el('option', null, pricesHidden() ? p.name : p.name + ' (' + priceLabel(p).replace('À partir de', 'dès') + ')'); o.value = p.id; o.setAttribute('data-name', p.name); cplan.appendChild(o); });
       var want = keep || cplan.getAttribute('data-want');
       if (want && hasOption(cplan, want)) cplan.value = want;
     }

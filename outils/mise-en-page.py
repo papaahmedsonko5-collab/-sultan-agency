@@ -79,7 +79,7 @@ def pied(page, p):
         <h2>Expertises</h2>
         <ul>
 {poles}
-          <li><a href="{p}creation-site-web.html">Tarifs des sites web</a></li>
+          <li><a href="{p}creation-site-web.html">Nos formules de sites web</a></li>
         </ul>
       </div>
       <div class="footer-col">
