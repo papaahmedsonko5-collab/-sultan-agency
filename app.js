@@ -375,6 +375,14 @@
 
   /* Boucle vidéo de l'ouverture : chargée seulement sur grand écran, sans économiseur de données
      ni préférence « réduire les animations ». Sinon, l'image fixe (poster) reste affichée. */
+  /* Portrait du fondateur en ouverture : si l'image distante ne charge pas, la photo de scène reste visible */
+  function initHeroPortrait() {
+    var img = document.querySelector('.h-hero-portrait');
+    if (!img) return;
+    function fail() { img.parentNode.classList.add('no-portrait'); }
+    if (img.complete && !img.naturalWidth) fail(); else img.addEventListener('error', fail);
+  }
+
   function initOpeningVideo() {
     var v = document.querySelector('video[data-src]');
     if (!v) return;
@@ -787,6 +795,7 @@
 
   initNav();
   initReveal();
+  initHeroPortrait();
   initOpeningVideo();
   initForm();
   initRequestForm();

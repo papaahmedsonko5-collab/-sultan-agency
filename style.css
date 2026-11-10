@@ -628,6 +628,9 @@ a.pcard-shot:hover img.shot-mobile{transform:translateX(-50%) translateY(-8px)}
   .compare td:last-child{padding-top:10px}
   .compare td:last-child .btn{width:100%}
 }
+@media (max-width:520px){
+  .site-header .header-cta{display:none}
+}
 @media (max-width:420px){
   .logo-word small{display:none}
   .logo-mark{width:46px;height:46px}
@@ -665,7 +668,9 @@ a.pcard-shot:hover img.shot-mobile{transform:translateX(-50%) translateY(-8px)}
 /* Ouverture */
 .h-hero{position:relative;overflow:hidden;background:radial-gradient(70% 90% at 80% 30%,var(--glow),transparent 60%),var(--nuit);padding:clamp(40px,7vw,90px) 0 clamp(90px,10vw,130px)}
 .h-hero-media{position:absolute;inset:0 0 0 auto;width:min(52%,700px)}
-.h-hero-media img{width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:saturate(1.05) contrast(1.05)}
+.h-hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:saturate(1.05) contrast(1.05)}
+.h-hero-media .h-hero-portrait{object-position:center 18%}
+.h-hero-media.no-portrait .h-hero-portrait{display:none}
 .h-hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--nuit) 0%,rgba(13,12,11,.55) 30%,rgba(13,12,11,.15) 65%,rgba(13,12,11,.6) 100%),linear-gradient(0deg,var(--nuit) 0%,transparent 35%)}
 .h-hero-in{position:relative;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-rows:auto 1fr auto;min-height:min(78vh,720px)}
 .h-hero-text{grid-row:1/4;align-self:center;max-width:620px}
@@ -764,10 +769,14 @@ a.pcard-shot:hover img.shot-mobile{transform:translateX(-50%) translateY(-8px)}
 }
 @media (max-width:760px){
   .h-hero{padding-top:0}
-  .h-hero-media{position:relative;width:100%;height:360px;inset:auto}
+  .h-hero-media{position:relative;width:100%;height:440px;inset:auto}
   .h-hero-media::after{background:linear-gradient(0deg,var(--nuit) 2%,rgba(13,12,11,.2) 55%,rgba(13,12,11,.5))}
-  .h-hero-in{display:block;min-height:0;margin-top:-140px}
-  .h-quote,.h-sign{display:none}
+  .h-hero-in{display:block;min-height:0;margin-top:-60px}
+  .h-quote{display:none}
+  .h-sign{position:absolute;top:-130px;right:var(--pad);z-index:1}
+  .h-sign .name{font-size:1.9rem}
+  .h-sign .role{font-size:.6rem;margin-top:6px}
+  .h-hero-in{position:relative}
   .h-stats li{padding:0 14px}
   .h-stats b{font-size:1.8rem}
   .h-cta>*{flex:1 1 100%;justify-content:center}
