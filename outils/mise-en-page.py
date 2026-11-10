@@ -29,7 +29,7 @@ POLES = [
 
 WHATSAPP = 'https://wa.me/221781482035'
 LOGO = ('<a class="logo" href="{p}index.html" aria-label="Sultan Agency, accueil">'
-        '<span class="logo-mark" aria-hidden="true">SA</span>'
+        '<img class="logo-mark" src="{p}images/logo-sultan-agency.png" alt="" width="56" height="56">'
         '<span class="logo-word">Sultan Agency<small>Événements · Création · Dakar</small></span></a>')
 
 
