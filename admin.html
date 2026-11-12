@@ -236,6 +236,9 @@ dialog.wide{width:min(760px,calc(100vw - 24px))}
 .meter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#c98f3c,#e2c46a)}
 .pc-row{display:flex;justify-content:space-between;margin-top:12px;font-size:.92rem;color:var(--mute)}
 .pc-row b{color:var(--ok);font-weight:500}
+.pc-row b.neg,.neg{color:var(--err)}
+.crow .amt{font-weight:500;white-space:nowrap}
+.crow .info small{display:block}
 .pc-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 22px}
 .btn2{border:1px solid #4a3c22;background:#2a2116;border-radius:14px;padding:13px 10px;cursor:pointer;font-weight:500;text-align:center}
 .btn2:hover{border-color:var(--gold)}
@@ -387,6 +390,7 @@ dialog.wide{width:min(760px,calc(100vw - 24px))}
       <button class="tab" role="tab" id="tab-btn-orders" aria-selected="false" type="button" data-tab="orders" title="Projets"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/></svg><span class="lbl">Projets</span></button>
       <button class="tab" role="tab" id="tab-btn-invoices" aria-selected="false" type="button" data-tab="invoices" title="Factures"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg><span class="lbl">Factures</span></button>
       <button class="tab" role="tab" id="tab-btn-budget" aria-selected="false" type="button" data-tab="budget" title="Budget"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h2"/></svg><span class="lbl">Budget</span></button>
+      <button class="tab" role="tab" id="tab-btn-expenses" aria-selected="false" type="button" data-tab="expenses" title="Dépenses"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span class="lbl">Dépenses</span></button>
       <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads" title="Demandes clients"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Demandes</span><span class="count" id="leads-count" hidden>0</span></button>
       <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats" title="Statistiques"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span class="lbl">Statistiques</span></button>
       <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing" title="Tarifs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span class="lbl">Tarifs</span></button>
@@ -419,6 +423,7 @@ dialog.wide{width:min(760px,calc(100vw - 24px))}
             <strong id="h-rest">0</strong>
             <div class="meter"><i id="h-meter"></i></div>
             <div class="pc-row"><span>Encaissé</span><b id="h-paid">0</b></div>
+            <div class="pc-row"><span>Dépenses</span><b class="neg" id="h-exp">0</b></div>
           </div>
           <div class="pc-actions">
             <button class="btn2" type="button" id="h-new">Nouveau projet</button>
@@ -513,11 +518,35 @@ dialog.wide{width:min(760px,calc(100vw - 24px))}
         <div class="kpi"><small>Taux d'encaissement</small><strong id="b-rate">0 %</strong></div>
         <div class="kpi"><small>Budget moyen par projet</small><strong id="b-avg">0</strong></div>
       </div>
+      <div class="kpis">
+        <div class="kpi"><small>Dépenses</small><strong id="b-exp">0</strong></div>
+        <div class="kpi"><small>Dépenses ce mois-ci</small><strong id="b-exp-m">0</strong></div>
+        <div class="kpi"><small>Encaissé moins dépenses</small><strong id="b-net">0</strong></div>
+        <div class="kpi"><small>Marge sur l'encaissé</small><strong id="b-margin">0 %</strong></div>
+      </div>
       <div class="stgrid">
         <section class="panel"><h2>Par type de prestation</h2><div id="b-services"></div></section>
         <section class="panel"><h2>Par statut de projet</h2><div id="b-status"></div></section>
       </div>
       <section class="panel"><h2>Mois par mois</h2><div id="b-months"></div></section>
+    </div>
+
+    <div id="tab-expenses" hidden>
+      <div class="head">
+        <div><h1>Dépenses</h1><p>Ce que l'agence dépense : matériel, logiciels, sous-traitance, publicité et le reste.</p></div>
+        <button class="btn btn-primary" id="add-exp" type="button">Ajouter une dépense</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi gold"><small>Total des dépenses</small><strong id="e-total">0</strong></div>
+        <div class="kpi"><small>Ce mois-ci</small><strong id="e-month">0</strong></div>
+        <div class="kpi"><small>Encaissé moins dépenses</small><strong id="e-net">0</strong></div>
+        <div class="kpi"><small>Dépenses enregistrées</small><strong id="e-count">0</strong></div>
+      </div>
+      <div class="chips" id="e-chips" role="group" aria-label="Filtrer par catégorie"></div>
+      <div class="stgrid">
+        <section class="panel" aria-label="Liste des dépenses"><h2>Toutes les dépenses</h2><div id="e-list"></div></section>
+        <section class="panel"><h2>Par catégorie</h2><div id="e-cats"></div></section>
+      </div>
     </div>
 
     <div id="tab-leads" hidden>
@@ -653,6 +682,27 @@ dialog.wide{width:min(760px,calc(100vw - 24px))}
     <div class="dlg-actions">
       <button class="btn btn-ghost" type="button" id="ci-cancel">Annuler</button>
       <button class="btn btn-primary" type="submit" id="ci-save">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-exp">
+  <h2 id="exp-title">Nouvelle dépense</h2>
+  <form id="exp-form" novalidate>
+    <div class="field"><label for="x-label">Libellé</label><input id="x-label" maxlength="160" required></div>
+    <div class="two">
+      <div class="field"><label for="x-cat">Catégorie</label><select id="x-cat"></select></div>
+      <div class="field"><label for="x-amount">Montant (FCFA)</label><input id="x-amount" type="number" inputmode="numeric" min="0" step="1" required></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="x-date">Date</label><input id="x-date" type="date" required></div>
+      <div class="field"><label for="x-order">Projet lié (facultatif)</label><select id="x-order"></select></div>
+    </div>
+    <div class="field"><label for="x-notes">Notes (facultatif)</label><textarea id="x-notes" maxlength="1000"></textarea></div>
+    <p class="msg" id="exp-msg" role="alert"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" type="button" id="exp-cancel">Annuler</button>
+      <button class="btn btn-primary" type="submit" id="exp-save">Enregistrer</button>
     </div>
   </form>
 </dialog>
