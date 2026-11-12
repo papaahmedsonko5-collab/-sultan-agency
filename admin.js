@@ -160,7 +160,7 @@
       .order('ordered_on', { ascending: false })
       .order('created_at', { ascending: false })
       .then(function (res) {
-        if (res.error) { loadError = 'Impossible de charger les commandes. Vérifiez votre connexion et réessayez.'; orders = []; }
+        if (res.error) { loadError = 'Impossible de charger les projets. Vérifiez votre connexion et réessayez.'; orders = []; }
         else orders = res.data || [];
         render();
       });
@@ -248,7 +248,7 @@
       return;
     }
     if (!list.length) {
-      root.appendChild(el('p', 'state', orders.length ? 'Aucune commande ne correspond à ces filtres.' : 'Aucune commande pour le moment. Ajoutez la première.'));
+      root.appendChild(el('p', 'state', orders.length ? 'Aucun projet ne correspond à ces filtres.' : 'Aucun projet pour le moment. Ajoutez le premier.'));
       return;
     }
     list.forEach(function (o) {
@@ -262,6 +262,7 @@
       var badge = el('span', 'badge ' + o.status, STATUS[o.status] || o.status);
       badge.style.justifySelf = 'end';
       b.appendChild(badge);
+      if (o.status !== 'annule') b.appendChild(progress(o, 'bar'));
       b.addEventListener('click', function () { selectedId = o.id; render(); });
       root.appendChild(b);
     });
@@ -271,7 +272,7 @@
     var p = $('#detail-panel');
     p.textContent = '';
     var o = orders.filter(function (x) { return x.id === selectedId; })[0];
-    if (!o) { p.appendChild(el('p', 'state', 'Sélectionnez une commande pour voir son détail.')); return; }
+    if (!o) { p.appendChild(el('p', 'state', 'Sélectionnez un projet pour voir son détail.')); return; }
     var box = el('div', 'detail');
     box.appendChild(el('h2', null, o.client_name));
     box.appendChild(el('span', 'badge ' + o.status, STATUS[o.status] || o.status));
@@ -280,17 +281,20 @@
     function row(k, v) { var d = el('div'); d.appendChild(el('dt', null, k)); d.appendChild(el('dd', null, v)); dl.appendChild(d); }
     row('Type de site', o.service || 'Non précisé');
     row('Date', fmtDate(o.ordered_on));
-    row('Montant', money(o.amount));
+    row('Budget', money(o.amount));
     row('Encaissé', money(o.paid));
     row('Reste à encaisser', money(Number(o.amount) - Number(o.paid)));
     box.appendChild(dl);
+    if (o.status !== 'annule') { box.appendChild(el('small', 'mute', 'Payé à ' + pctOf(o) + ' %')); box.appendChild(progress(o)); }
     if (o.notes) box.appendChild(el('p', 'notes', o.notes));
     var act = el('div', 'actions');
     var ed = el('button', 'btn btn-primary btn-sm', 'Modifier'); ed.type = 'button';
     ed.addEventListener('click', function () { openForm(o); });
     var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
     del.addEventListener('click', function () { removeOrder(o); });
-    act.appendChild(ed); act.appendChild(del);
+    var inv = el('button', 'btn btn-ghost btn-sm', 'Voir la facture'); inv.type = 'button';
+    inv.addEventListener('click', function () { openInvoice(o); });
+    act.appendChild(ed); if (o.status !== 'annule') act.appendChild(inv); act.appendChild(del);
     box.appendChild(act);
     p.appendChild(box);
   }
@@ -302,6 +306,9 @@
     renderChart(list);
     renderList(list);
     renderDetail(list);
+    renderHome();
+    renderInvoices();
+    renderBudget();
   }
 
   /* ---------- Formulaire ---------- */
@@ -309,7 +316,7 @@
   function openForm(o, lead) {
     editingId = o ? o.id : null;
     pendingLead = lead || null;
-    $('#dlg-title').textContent = o ? 'Modifier la commande' : 'Nouvelle commande';
+    $('#dlg-title').textContent = o ? 'Modifier le projet' : 'Nouveau projet';
     $('#o-client').value = o ? o.client_name : '';
     $('#o-project').value = o ? o.project_title : '';
     var svc = $('#o-service');
@@ -321,7 +328,7 @@
     $('#o-date').value = o ? o.ordered_on : isoDate(new Date());
     $('#o-notes').value = o && o.notes ? o.notes : '';
     if (lead) {
-      $('#dlg-title').textContent = 'Transformer en commande';
+      $('#dlg-title').textContent = 'Transformer en projet';
       $('#o-client').value = lead.name;
       var opts = Array.prototype.map.call($('#o-service').options, function (x) { return x.value; });
       $('#o-service').value = opts.indexOf(lead.service) !== -1 ? lead.service : 'Autre';
@@ -353,7 +360,7 @@
     if (!rec.project_title) { msg.textContent = 'Indiquez le projet.'; return; }
     if (isNaN(rec.amount) || rec.amount < 0) { msg.textContent = 'Le montant doit être un nombre positif.'; return; }
     if (isNaN(rec.paid) || rec.paid < 0) { msg.textContent = 'Le montant encaissé doit être un nombre positif.'; return; }
-    if (rec.paid > rec.amount) { msg.textContent = 'Le montant encaissé ne peut pas dépasser le montant de la commande.'; return; }
+    if (rec.paid > rec.amount) { msg.textContent = 'Le montant encaissé ne peut pas dépasser le budget du projet.'; return; }
     if (!rec.ordered_on) { msg.textContent = 'Indiquez la date.'; return; }
     msg.textContent = '';
     var save = $('#dlg-save');
@@ -365,7 +372,7 @@
       save.disabled = false;
       if (res.error) { msg.textContent = 'Enregistrement impossible : ' + res.error.message; return; }
       dlg.close();
-      toast(editingId ? 'Commande modifiée' : 'Commande ajoutée');
+      toast(editingId ? 'Projet modifié' : 'Projet ajouté');
       selectedId = res.data.id;
       lastOwnOrderId = res.data.id;
       var from = pendingLead;
@@ -378,10 +385,10 @@
   });
 
   function removeOrder(o) {
-    if (!window.confirm('Supprimer la commande « ' + o.client_name + ' » (' + money(o.amount) + ') ? Cette action est définitive.')) return;
+    if (!window.confirm('Supprimer le projet « ' + o.client_name + ' » (' + money(o.amount) + ') ? Cette action est définitive.')) return;
     sb.from('orders').delete().eq('id', o.id).then(function (res) {
       if (res.error) { toast('Suppression impossible', true); return; }
-      toast('Commande supprimée');
+      toast('Projet supprimé');
       selectedId = null;
       loadOrders();
     });
@@ -500,6 +507,7 @@
     c.textContent = String(news);
     c.hidden = news === 0;
     document.title = (news ? '(' + news + ') ' : '') + BASE_TITLE;
+    renderHomeLeads();
     fillServiceFilter();
 
     var list = leadsFiltered();
@@ -587,11 +595,11 @@
       act.appendChild(a);
     }
     if (!l.order_id) {
-      var conv = el('button', 'btn btn-primary btn-sm', 'Transformer en commande'); conv.type = 'button';
+      var conv = el('button', 'btn btn-primary btn-sm', 'Transformer en projet'); conv.type = 'button';
       conv.addEventListener('click', function () { openForm(null, l); });
       act.appendChild(conv);
     } else {
-      act.appendChild(el('span', 'badge accepte', 'Déjà transformée en commande'));
+      act.appendChild(el('span', 'badge accepte', 'Déjà transformée en projet'));
     }
     var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
     del.addEventListener('click', function () {
@@ -982,16 +990,361 @@
   }
   $('#st-period').addEventListener('change', loadStats);
 
+  /* ---------- Tableau de bord, factures, budget ---------- */
+  var AGENCY = { name: 'Sultan Agency', place: 'Dakar, Sénégal', phone: '+221 78 148 20 35', email: 'papaahmedsonko5@gmail.com' };
+  var PAY = { payee: 'Payée', acompte: 'Acompte reçu', impayee: 'Impayée' };
+  var homeRange = 12;
+  var invFilter = '';
+  var payingId = null;
+  var invoiceId = null;
+
+  function activeOrders() { return orders.filter(function (o) { return o.status !== 'annule'; }); }
+  function restOf(o) { return Math.max(0, Number(o.amount) - Number(o.paid)); }
+  function pctOf(o) { return Number(o.amount) > 0 ? Math.min(100, Math.round(Number(o.paid) / Number(o.amount) * 100)) : 100; }
+  function payState(o) { return restOf(o) === 0 ? 'payee' : (Number(o.paid) > 0 ? 'acompte' : 'impayee'); }
+  function invNo(o) { return 'FA-' + o.ordered_on.slice(2, 4) + o.ordered_on.slice(5, 7) + '-' + String(o.id).replace(/-/g, '').slice(0, 4).toUpperCase(); }
+  function short(v) { return v >= 1000000 ? (v / 1000000).toFixed(1).replace('.0', '') + ' M' : Math.round(v / 1000) + ' k'; }
+  function progress(o, cls) {
+    var bar = el('span', cls || 'prog');
+    var i = el('i', pctOf(o) === 100 ? 'full' : null);
+    i.style.width = pctOf(o) + '%';
+    bar.appendChild(i);
+    return bar;
+  }
+  function sums(list) {
+    var t = 0, p = 0;
+    list.forEach(function (o) { t += Number(o.amount); p += Number(o.paid); });
+    return { total: t, paid: p, rest: t - p };
+  }
+  function goTab(which) {
+    if (which === 'stats') loadStats();
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+      var n = t.getAttribute('data-tab');
+      $('#tab-' + n).hidden = (n !== which);
+      t.setAttribute('aria-selected', String(n === which));
+    });
+    window.scrollTo(0, 0);
+  }
+  function setChips(root, value, attr) {
+    Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute(attr) === value));
+    });
+  }
+
+  function areaChart(box, keys, values) {
+    box.textContent = '';
+    var NS = 'http://www.w3.org/2000/svg';
+    var W = Math.max(300, Math.min(760, box.clientWidth || 760)), H = W < 500 ? 200 : 240, pl = 8, pr = 48, pt = 16, pb = 30;
+    var max = Math.max.apply(null, values.concat([1]));
+    var step = Math.pow(10, Math.floor(Math.log(max) / Math.LN10));
+    var top = Math.ceil(max / step) * step;
+    if (top / step > 5) { step *= 2; top = Math.ceil(max / step) * step; }
+    function n(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    var svg = n('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Montant signé par mois' });
+    var defs = n('defs', {});
+    var g = n('linearGradient', { id: 'ag', x1: 0, y1: 0, x2: 0, y2: 1 });
+    g.appendChild(n('stop', { offset: '0', 'stop-color': '#d9963f', 'stop-opacity': '.75' }));
+    g.appendChild(n('stop', { offset: '1', 'stop-color': '#d9963f', 'stop-opacity': '.04' }));
+    defs.appendChild(g); svg.appendChild(defs);
+    var iw = W - pl - pr, ih = H - pt - pb;
+    function X(i) { return pl + (keys.length === 1 ? iw / 2 : i * iw / (keys.length - 1)); }
+    function Y(v) { return pt + ih - (v / top) * ih; }
+    for (var s = 0; s <= top; s += step) {
+      svg.appendChild(n('line', { x1: pl, x2: W - pr, y1: Y(s), y2: Y(s), stroke: '#2e2820', 'stroke-dasharray': s ? '3 5' : '0' }));
+      svg.appendChild(n('text', { x: W - pr + 8, y: Y(s) + 4, fill: '#a59c8d', 'font-size': 12 }, s ? short(s) : '0'));
+    }
+    var line = values.map(function (v, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); }).join(' ');
+    svg.appendChild(n('path', { d: line + ' L' + X(values.length - 1).toFixed(1) + ' ' + Y(0) + ' L' + X(0).toFixed(1) + ' ' + Y(0) + ' Z', fill: 'url(#ag)' }));
+    svg.appendChild(n('path', { d: line, fill: 'none', stroke: '#e2a851', 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    var every = Math.ceil(keys.length / (W < 500 ? 3 : 6));
+    keys.forEach(function (k, i) {
+      var c = n('circle', { cx: X(i), cy: Y(values[i]), r: values[i] ? 4.5 : 0, fill: '#faf9f5', stroke: '#e2a851', 'stroke-width': 2 });
+      c.appendChild(n('title', {}, MONTHS[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4) + ' : ' + money(values[i])));
+      svg.appendChild(c);
+      if (i % every === 0 || i === keys.length - 1) {
+        svg.appendChild(n('text', { x: X(i), y: H - 8, fill: '#a59c8d', 'font-size': 12, 'text-anchor': i === 0 ? 'start' : (i === keys.length - 1 ? 'end' : 'middle') },
+          MONTHS[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(2, 4)));
+      }
+    });
+    box.appendChild(svg);
+  }
+
+  function renderHome() {
+    var act = activeOrders();
+    var s = sums(act);
+    $('#h-total').textContent = money(s.total);
+    $('#h-rest').textContent = money(s.rest);
+    $('#h-paid').textContent = money(s.paid);
+    var rate = s.total ? Math.round(s.paid / s.total * 100) : 0;
+    $('#h-meter').style.width = rate + '%';
+    $('#h-rate').textContent = act.length ? rate + ' % déjà encaissé' : '';
+
+    var byMonth = {};
+    act.forEach(function (o) { var k = o.ordered_on.slice(0, 7); byMonth[k] = (byMonth[k] || 0) + Number(o.amount); });
+    var keys = [], d = new Date();
+    d.setDate(1);
+    for (var i = 0; i < homeRange; i++) { keys.unshift(d.getFullYear() + '-' + pad(d.getMonth() + 1)); d.setMonth(d.getMonth() - 1); }
+    var values = keys.map(function (k) { return byMonth[k] || 0; });
+    areaChart($('#h-area'), keys, values);
+    var sum = values.reduce(function (a, b) { return a + b; }, 0);
+    $('#h-avg').textContent = 'Moyenne sur ' + homeRange + ' mois : ' + money(sum / homeRange);
+
+    var rec = $('#h-recent');
+    rec.textContent = '';
+    if (!act.length) rec.appendChild(el('p', 'empty', 'Aucune facture pour le moment.'));
+    act.slice(0, 4).forEach(function (o) {
+      var b = el('button', 'tx'); b.type = 'button';
+      b.appendChild(el('b', null, o.client_name));
+      b.appendChild(el('small', null, invNo(o) + ' · ' + fmtDate(o.ordered_on)));
+      var r = restOf(o);
+      b.appendChild(el('span', 'a ' + (r ? 'due' : 'ok'), r ? 'Reste ' + money(r) : 'Payée'));
+      b.addEventListener('click', function () { openInvoice(o); });
+      rec.appendChild(b);
+    });
+
+    var pj = $('#h-projects');
+    pj.textContent = '';
+    var running = act.filter(function (o) { return o.status === 'en_cours' || o.status === 'nouveau'; });
+    if (!running.length) pj.appendChild(el('p', 'empty', 'Aucun projet en cours.'));
+    running.slice(0, 5).forEach(function (o) {
+      var b = el('button', 'pj'); b.type = 'button';
+      var r1 = el('span', 'r1');
+      r1.appendChild(el('b', null, o.project_title));
+      r1.appendChild(el('span', null, money(o.amount)));
+      b.appendChild(r1);
+      b.appendChild(el('small', null, o.client_name + ' · payé à ' + pctOf(o) + ' %'));
+      b.appendChild(progress(o));
+      b.addEventListener('click', function () { selectedId = o.id; filters.status = ''; $('#f-status').value = ''; setChips($('#f-chips'), '', 'data-s'); render(); goTab('orders'); });
+      pj.appendChild(b);
+    });
+    renderHomeLeads();
+  }
+
+  function renderHomeLeads() {
+    var news = leads.filter(function (l) { return l.status === 'nouveau'; }).length;
+    $('#h-leads').textContent = String(news);
+    $('#h-leads-txt').textContent = news ? (news > 1 ? 'nouvelles demandes attendent votre réponse.' : 'nouvelle demande attend votre réponse.')
+      : 'Aucune nouvelle demande. ' + leads.length + ' reçue' + (leads.length > 1 ? 's' : '') + ' au total.';
+  }
+
+  /* Factures */
+  function renderInvoices() {
+    var act = activeOrders();
+    var s = sums(act);
+    $('#i-total').textContent = money(s.total);
+    $('#i-paid').textContent = money(s.paid);
+    $('#i-rest').textContent = money(s.rest);
+    $('#i-open').textContent = String(act.filter(function (o) { return restOf(o) > 0; }).length);
+    var root = $('#i-list');
+    root.textContent = '';
+    var list = act.filter(function (o) { return !invFilter || payState(o) === invFilter; });
+    if (!list.length) { root.appendChild(el('p', 'state', act.length ? 'Aucune facture dans cette catégorie.' : 'Aucune facture pour le moment. Elles apparaissent dès que vous ajoutez un projet.')); return; }
+    var h = el('div', 'irow h');
+    ['N°', 'Client et projet', 'Date', 'Montant', 'Payé', 'Reste dû', ''].forEach(function (t, i) { h.appendChild(el('span', i > 2 && i < 6 ? 'n' : null, t)); });
+    root.appendChild(h);
+    list.forEach(function (o) {
+      var r = el('div', 'irow');
+      r.appendChild(el('span', 'no', invNo(o)));
+      var c = el('span', 'c');
+      c.appendChild(el('b', null, o.client_name));
+      c.appendChild(el('small', null, o.project_title));
+      r.appendChild(c);
+      function cell(label, text, cls) { var x = el('span', cls || null, text); x.setAttribute('data-l', label); r.appendChild(x); }
+      cell('Date', fmtDate(o.ordered_on));
+      cell('Montant', money(o.amount), 'n');
+      cell('Payé', money(o.paid), 'n');
+      cell('Reste dû', money(restOf(o)), 'n');
+      var a = el('span', 'acts');
+      a.appendChild(el('span', 'badge ' + payState(o), PAY[payState(o)]));
+      var v = el('button', 'btn btn-ghost btn-sm', 'Voir'); v.type = 'button';
+      v.addEventListener('click', function () { openInvoice(o); });
+      a.appendChild(v);
+      if (restOf(o) > 0) {
+        var p = el('button', 'btn btn-primary btn-sm', 'Paiement reçu'); p.type = 'button';
+        p.addEventListener('click', function () { openPay(o); });
+        a.appendChild(p);
+      }
+      r.appendChild(a);
+      root.appendChild(r);
+    });
+  }
+
+  function buildInvoice(o) {
+    var d = el('div', 'inv');
+    var ih = el('div', 'ih');
+    var left = el('div');
+    var img = el('img'); img.src = 'images/logo-sultan-agency.png'; img.alt = '';
+    left.appendChild(img);
+    left.appendChild(el('strong', null, AGENCY.name));
+    left.appendChild(el('div', 'mu', AGENCY.place));
+    left.appendChild(el('div', 'mu', AGENCY.phone + ' · ' + AGENCY.email));
+    var right = el('div');
+    right.appendChild(el('h3', null, 'FACTURE'));
+    right.appendChild(el('div', null, 'N° ' + invNo(o)));
+    right.appendChild(el('div', 'mu', 'Date : ' + fmtDate(o.ordered_on)));
+    right.appendChild(el('div', 'mu', 'Statut : ' + PAY[payState(o)]));
+    ih.appendChild(left); ih.appendChild(right);
+    d.appendChild(ih);
+    var to = el('div', 'to');
+    to.appendChild(el('div', 'mu', 'Facturé à'));
+    to.appendChild(el('strong', null, o.client_name));
+    d.appendChild(to);
+    var t = el('table'), th = el('tr'), tr = el('tr');
+    th.appendChild(el('th', null, 'Désignation')); th.appendChild(el('th', null, 'Montant'));
+    var td = el('td');
+    td.appendChild(el('div', null, o.project_title));
+    if (o.service) td.appendChild(el('div', 'mu', o.service));
+    tr.appendChild(td); tr.appendChild(el('td', null, money(o.amount)));
+    t.appendChild(th); t.appendChild(tr);
+    d.appendChild(t);
+    var sum = el('div', 'sum');
+    function line(k, v, cls) { var x = el('div', cls || null); x.appendChild(el('span', null, k)); x.appendChild(el('span', null, v)); sum.appendChild(x); }
+    line('Total', money(o.amount));
+    line('Déjà réglé', money(o.paid));
+    line('Reste à payer', money(restOf(o)), 't');
+    d.appendChild(sum);
+    var ft = el('div', 'ft mu', 'Conditions de règlement : acompte de 60 % à la commande, solde de 40 % avant la livraison. Montants en francs CFA.');
+    d.appendChild(ft);
+    return d;
+  }
+  var dlgInv = $('#dlg-inv');
+  function openInvoice(o) {
+    invoiceId = o.id;
+    var box = $('#inv-doc');
+    box.textContent = '';
+    box.appendChild(buildInvoice(o));
+    dlgInv.showModal();
+  }
+  $('#inv-close').addEventListener('click', function () { dlgInv.close(); });
+  $('#inv-print').addEventListener('click', function () {
+    var o = orders.filter(function (x) { return x.id === invoiceId; })[0];
+    if (!o) return;
+    var area = $('#print-area');
+    area.textContent = '';
+    area.appendChild(buildInvoice(o));
+    var old = document.title;
+    document.title = 'Facture ' + invNo(o) + ' ' + o.client_name;
+    dlgInv.close();
+    window.print();
+    document.title = old;
+  });
+
+  var dlgPay = $('#dlg-pay');
+  function openPay(o) {
+    payingId = o.id;
+    $('#pay-info').textContent = o.client_name + ' · ' + invNo(o) + '. Reste dû : ' + money(restOf(o)) + '.';
+    $('#pay-amount').value = restOf(o);
+    $('#pay-amount').max = restOf(o);
+    $('#pay-msg').textContent = '';
+    dlgPay.showModal();
+    $('#pay-amount').select();
+  }
+  $('#pay-cancel').addEventListener('click', function () { dlgPay.close(); });
+  $('#pay-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var o = orders.filter(function (x) { return x.id === payingId; })[0];
+    var msg = $('#pay-msg');
+    if (!o) { dlgPay.close(); return; }
+    var amt = parseInt($('#pay-amount').value, 10);
+    if (isNaN(amt) || amt <= 0) { msg.textContent = 'Indiquez un montant supérieur à zéro.'; return; }
+    if (amt > restOf(o)) { msg.textContent = 'Le montant dépasse le reste dû (' + money(restOf(o)) + ').'; return; }
+    var save = $('#pay-save');
+    save.disabled = true;
+    sb.from('orders').update({ paid: Number(o.paid) + amt }).eq('id', o.id).select().single().then(function (res) {
+      save.disabled = false;
+      if (res.error) { msg.textContent = 'Enregistrement impossible : ' + res.error.message; return; }
+      dlgPay.close();
+      toast('Paiement de ' + money(amt) + ' enregistré');
+      loadOrders(true);
+    });
+  });
+
+  /* Budget */
+  function renderBudget() {
+    var act = activeOrders();
+    var s = sums(act);
+    $('#b-total').textContent = money(s.total);
+    $('#b-paid').textContent = money(s.paid);
+    $('#b-rate').textContent = (s.total ? Math.round(s.paid / s.total * 100) : 0) + ' %';
+    $('#b-avg').textContent = money(act.length ? s.total / act.length : 0);
+    function ranks(id, groups, labels) {
+      var root = $(id);
+      root.textContent = '';
+      var keys = Object.keys(groups).sort(function (a, b) { return groups[b].total - groups[a].total; });
+      if (!keys.length) { root.appendChild(el('p', 'state', 'Aucune donnée pour le moment.')); return; }
+      var max = groups[keys[0]].total || 1;
+      keys.forEach(function (k) {
+        var g = groups[k], r = el('div', 'rank'), r1 = el('div', 'r1');
+        r1.appendChild(el('span', null, ((labels && labels[k]) || k) + ' (' + g.n + ')'));
+        r1.appendChild(el('b', null, money(g.total)));
+        r.appendChild(r1);
+        r.appendChild(el('small', 'mute', 'Encaissé ' + money(g.paid) + ' · reste ' + money(g.total - g.paid)));
+        var bar = el('div', 'bar'); bar.style.width = Math.max(2, g.total / max * 100) + '%';
+        r.appendChild(bar);
+        root.appendChild(r);
+      });
+    }
+    function group(list, fn) {
+      var g = {};
+      list.forEach(function (o) { var k = fn(o); g[k] = g[k] || { total: 0, paid: 0, n: 0 }; g[k].total += Number(o.amount); g[k].paid += Number(o.paid); g[k].n++; });
+      return g;
+    }
+    ranks('#b-services', group(act, function (o) { return o.service || 'Non précisé'; }));
+    ranks('#b-status', group(orders, function (o) { return o.status; }), STATUS);
+    var root = $('#b-months');
+    root.textContent = '';
+    var gm = group(act, function (o) { return o.ordered_on.slice(0, 7); });
+    var keys = Object.keys(gm).sort().reverse();
+    if (!keys.length) { root.appendChild(el('p', 'state', 'Aucune donnée pour le moment.')); return; }
+    var wrap = el('div', 'scroll'), t = el('table', 'mtable'), hr = el('tr');
+    ['Mois', 'Projets', 'Budget signé', 'Encaissé', 'Reste'].forEach(function (x) { hr.appendChild(el('th', null, x)); });
+    t.appendChild(hr);
+    keys.forEach(function (k) {
+      var g = gm[k], tr = el('tr');
+      [MONTHS[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4), String(g.n), money(g.total), money(g.paid), money(g.total - g.paid)].forEach(function (x) { tr.appendChild(el('td', null, x)); });
+      t.appendChild(tr);
+    });
+    wrap.appendChild(t);
+    root.appendChild(wrap);
+  }
+
+  $('#h-range').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    homeRange = Number(b.getAttribute('data-r'));
+    setChips(this, String(homeRange), 'data-r');
+    renderHome();
+  });
+  $('#i-chips').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    invFilter = b.getAttribute('data-s');
+    setChips(this, invFilter, 'data-s');
+    renderInvoices();
+  });
+  $('#f-chips').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    filters.status = b.getAttribute('data-s');
+    $('#f-status').value = filters.status;
+    setChips(this, filters.status, 'data-s');
+    render();
+  });
+  $('#h-new').addEventListener('click', function () { openForm(null); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-go]'), function (b) {
+    b.addEventListener('click', function () { goTab(b.getAttribute('data-go')); });
+  });
+  (function () {
+    var d = new Date(), days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    var full = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    $('#today').textContent = days[d.getDay()] + ' ' + d.getDate() + ' ' + full[d.getMonth()] + ' ' + d.getFullYear();
+  })();
+
   /* ---------- Onglets ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
-    t.addEventListener('click', function () {
-      var which = t.getAttribute('data-tab');
-      if (which === 'stats') loadStats();
-      ['orders', 'leads', 'pricing', 'projects', 'gallery', 'stats'].forEach(function (n) {
-        $('#tab-' + n).hidden = (n !== which);
-        $('#tab-btn-' + n).setAttribute('aria-selected', String(n === which));
-      });
-    });
+    t.addEventListener('click', function () { goTab(t.getAttribute('data-tab')); });
   });
 
   /* ---------- Alertes en direct ---------- */
@@ -1009,7 +1362,7 @@
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, function (payload) {
         if (payload.eventType === 'INSERT') {
           var o = payload.new || {};
-          if (o.id !== lastOwnOrderId) toast('Nouvelle commande : ' + (o.client_name || '') + ' (' + money(o.amount || 0) + ')');
+          if (o.id !== lastOwnOrderId) toast('Nouveau projet : ' + (o.client_name || '') + ' (' + money(o.amount || 0) + ')');
         }
         loadOrders(true);
       })

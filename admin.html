@@ -156,6 +156,183 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 @media (max-width:900px){.filters4{grid-template-columns:minmax(0,1fr)}.stgrid{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:minmax(0,1fr)}.filters{grid-template-columns:1fr}}
 @media (max-width:520px){.two,.detail dl{grid-template-columns:1fr}.who span{display:none}}
 .order b,.order small,.detail h2,.detail dd,.msgbox p{overflow-wrap:anywhere;min-width:0}
+
+/* ===== Tableau de bord v2 : barre latérale, cartes arrondies, tons bronze ===== */
+:root{--card:rgba(26,22,17,.78);--card2:#1d1812;--line:#2e2820;--r:22px;--r2:14px;--mute:#a59c8d}
+#view-app{min-height:100vh;background:
+  radial-gradient(900px 520px at 88% -8%,rgba(201,140,60,.20),transparent 60%),
+  radial-gradient(700px 480px at 0% 100%,rgba(201,168,76,.10),transparent 60%),#0b0907}
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;padding:22px 14px;border-right:1px solid var(--line);background:rgba(12,10,8,.72);backdrop-filter:blur(10px)}
+.side .brand{display:flex;align-items:center;gap:10px;font:700 1.05rem var(--serif);color:var(--gold);padding:0 6px 8px}
+.side .brand img{width:44px;height:44px;object-fit:contain;flex:none}
+.side .tabs{display:flex;flex-direction:column;gap:4px;border:0;margin:0;overflow:visible;flex:1}
+.side .tab,.side-out{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-radius:var(--r2);padding:11px 12px;margin:0;color:var(--mute);font-weight:500;cursor:pointer;white-space:nowrap}
+.side .tab svg,.side-out svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.side .tab:hover,.side-out:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+.side .tab[aria-selected="true"]{color:#14100a;background:linear-gradient(135deg,#e2c46a,#c98f3c);border:0;box-shadow:0 8px 22px rgba(201,143,60,.28)}
+.side .tab .lbl{flex:1;overflow:hidden;text-overflow:ellipsis}
+.side .tab .count{margin:0;border-radius:99px;border-color:currentColor;color:inherit;background:rgba(0,0,0,.18)}
+.content{min-width:0}
+.top{border:0;padding:20px clamp(16px,3vw,34px) 0}
+.hello strong{display:block;font:500 1.15rem var(--sans)}
+.hello small{color:var(--mute)}
+.who span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px 14px;max-width:260px}
+main{max-width:1320px;padding:22px clamp(16px,3vw,34px) 48px}
+.head{margin-bottom:20px}
+.head h1{font:500 clamp(1.6rem,3vw,2.1rem) var(--sans);letter-spacing:-.01em}
+
+.btn{border-radius:12px}
+a.btn{color:inherit;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,#e2c46a,#c98f3c);border-color:transparent}
+.btn-primary:hover{background:linear-gradient(135deg,#edd38a,#d79e4b)}
+.field input,.field select,.field textarea,.filters select,.filters input,#st-period,.statusrow select,.notes-box textarea{border-radius:12px;background:#15110d;border-color:var(--line)}
+.kpi,.chart-box,.panel,.card{border:1px solid var(--line);background:var(--card);border-radius:var(--r);backdrop-filter:blur(8px)}
+.kpi{padding:18px 20px}
+.kpi strong{font:500 1.5rem var(--sans);letter-spacing:-.01em}
+.kpi.gold{border-color:transparent;background:linear-gradient(140deg,rgba(226,196,106,.95),rgba(201,143,60,.92));color:#14100a}
+.kpi.gold small{color:#3b2c12}
+.chart-box{padding:20px}
+.chart-box h2,.panel>h2,.card h2{font:500 1.05rem var(--sans)}
+.panel{overflow:hidden}
+.panel>h2{padding:16px 20px}
+.order{padding:14px 20px}
+.order:hover,.order[aria-pressed="true"]{background:rgba(255,255,255,.035)}
+.order .bar,.prog{display:block;grid-column:1/-1;height:5px;border-radius:99px;background:#2a231a;margin-top:8px;overflow:hidden}
+.order .bar i,.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#c98f3c,#e2c46a)}
+.order .bar i.full,.prog i.full{background:var(--ok)}
+.badge{border-radius:99px;padding:2px 10px;white-space:nowrap}
+.badge.payee{border-color:var(--ok);color:var(--ok)}
+.badge.acompte{border-color:var(--warn);color:var(--warn)}
+.badge.impayee{border-color:#6b2e27;color:var(--err)}
+.rank .bar{border-radius:99px;background:linear-gradient(90deg,#c98f3c,#e2c46a)}
+.rank,.ev,.crow{padding-left:20px;padding-right:20px}
+dialog{border-radius:var(--r);border-color:#4a3c22;background:#16120d}
+dialog.wide{width:min(760px,calc(100vw - 24px))}
+.toast{border-radius:14px}
+.filters2{grid-template-columns:minmax(0,220px) minmax(0,1fr)}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chips button{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:7px 14px;color:var(--mute);cursor:pointer;font-size:.9rem}
+.chips button[aria-pressed="true"]{color:var(--ink);background:#33291b;border-color:#5a4826}
+
+/* Accueil */
+.dash{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.25fr) minmax(0,1fr);grid-template-areas:"total total right" "promo proj right";gap:16px;align-items:stretch}
+.card{padding:22px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.card-h .link{margin:0;text-decoration:none;color:var(--mute)}
+.card small{color:var(--mute);font-size:.92rem}
+.big{display:block;font:500 clamp(1.7rem,3vw,2.2rem) var(--sans);letter-spacing:-.02em;margin-top:2px}
+.pill{display:inline-block;margin-top:6px;font-size:.85rem;color:var(--ok)}
+.c-total{grid-area:total}
+.c-total .chips{margin:0}
+#h-area svg{width:100%;height:auto;display:block}
+.legend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.88rem;margin-top:10px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:var(--gold)}
+.c-right{grid-area:right;background:linear-gradient(180deg,rgba(201,143,60,.30),rgba(26,22,17,.78) 46%);display:flex;flex-direction:column}
+.paycard{border-radius:18px;padding:20px;background:linear-gradient(150deg,#3b2c18,#17120c 70%);border:1px solid #5a4826;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.paycard strong{display:block;font:500 1.75rem var(--sans);letter-spacing:-.01em;margin:4px 0 14px}
+.meter{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#c98f3c,#e2c46a)}
+.pc-row{display:flex;justify-content:space-between;margin-top:12px;font-size:.92rem;color:var(--mute)}
+.pc-row b{color:var(--ok);font-weight:500}
+.pc-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 22px}
+.btn2{border:1px solid #4a3c22;background:#2a2116;border-radius:14px;padding:13px 10px;cursor:pointer;font-weight:500;text-align:center}
+.btn2:hover{border-color:var(--gold)}
+.btn2.gold{background:linear-gradient(135deg,#e2c46a,#c98f3c);color:#14100a;border-color:transparent}
+.btn2.white{background:#faf9f5;color:#14100a;border-color:transparent;width:100%;margin-top:auto}
+.tx{display:grid;grid-template-columns:1fr auto;gap:0 10px;width:100%;text-align:left;background:rgba(255,255,255,.035);border:0;border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.tx:hover{background:rgba(255,255,255,.07)}
+.tx b{font-weight:500;overflow-wrap:anywhere}
+.tx small{grid-column:1;font-size:.82rem}
+.tx .a{grid-row:1/3;grid-column:2;align-self:center;font-weight:500;white-space:nowrap}
+.tx .a.ok{color:var(--ok)}.tx .a.due{color:var(--err)}
+.promo{grid-area:promo;display:flex;flex-direction:column;gap:6px;min-height:240px;border-color:transparent;
+  background:radial-gradient(260px 200px at 100% 100%,rgba(20,14,8,.55),transparent 70%),linear-gradient(150deg,#d9a24c,#8f5a24 62%,#3a2412)}
+.promo small{color:#2b1d0b}
+.promo .big{color:#fff}
+.promo p{color:#fff3de;margin-bottom:16px}
+.c-proj{grid-area:proj}
+.pj{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;cursor:pointer}
+.pj:first-child{border-top:0}
+.pj .r1{display:flex;justify-content:space-between;gap:10px}
+.pj b{font-weight:500;overflow-wrap:anywhere}
+.pj small{display:block}
+.empty{color:var(--mute);padding:8px 0}
+
+/* Factures */
+.irow{display:grid;grid-template-columns:120px minmax(0,1fr) 92px 112px 112px 112px 304px;gap:6px 14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.irow.h{color:var(--mute);font-size:.85rem;padding-top:12px;padding-bottom:12px}
+.irow .no{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--gold2)}
+.irow .c b{display:block;font-weight:500;overflow-wrap:anywhere}
+.irow .c small{color:var(--mute);overflow-wrap:anywhere}
+.irow .n{text-align:right;white-space:nowrap}
+.irow .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+#chart svg{max-height:230px}
+.irow [data-l]::before{display:none}
+.mtable{width:100%;border-collapse:collapse}
+.mtable th,.mtable td{padding:12px 20px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.mtable th{color:var(--mute);font-weight:400;font-size:.85rem}
+.mtable th:first-child,.mtable td:first-child{text-align:left}
+.scroll{overflow-x:auto}
+
+/* Document facture */
+.inv{background:#fff;color:#16130f;border-radius:12px;padding:30px;margin-bottom:16px;font-size:.95rem}
+.inv .ih{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:2px solid #c9a84c;padding-bottom:18px;margin-bottom:18px}
+.inv .ih img{width:64px;height:64px;object-fit:contain;display:block;margin-bottom:6px}
+.inv h3{font:700 1.5rem var(--serif);letter-spacing:.02em}
+.inv .mu{color:#6b655c;font-size:.88rem}
+.inv .to{margin-bottom:18px}
+.inv table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.inv th{text-align:left;font-size:.82rem;color:#6b655c;border-bottom:1px solid #ddd6c8;padding:8px 0;font-weight:500}
+.inv td{padding:12px 0;border-bottom:1px solid #eee8dc;vertical-align:top}
+.inv th:last-child,.inv td:last-child{text-align:right;white-space:nowrap}
+.inv .sum{margin-left:auto;width:min(320px,100%)}
+.inv .sum div{display:flex;justify-content:space-between;padding:6px 0}
+.inv .sum .t{border-top:2px solid #16130f;font-weight:700;font-size:1.05rem;margin-top:4px;padding-top:10px}
+.inv .ft{margin-top:22px;padding-top:14px;border-top:1px solid #ddd6c8}
+#print-area{display:none}
+
+@media (max-width:1100px){
+  .dash{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"total total" "right right" "promo proj"}
+}
+@media (max-width:1320px){
+  .irow{grid-template-columns:minmax(0,1fr) auto}
+  .irow.h{display:none}
+  .irow .n{text-align:left}
+  .irow [data-l]::before{display:inline;content:attr(data-l) " : ";color:var(--mute)}
+  .irow .no,.irow .c{grid-column:1/-1}
+  .irow .acts{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+}
+@media (max-width:860px){
+  .shell{display:block}
+  .side{position:sticky;top:0;z-index:20;height:auto;flex-direction:row;align-items:center;gap:8px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line);background:rgba(12,10,8,.94)}
+  .side .brand{padding:0}.side .brand span{display:none}.side .brand img{width:36px;height:36px}
+  .side .tabs{flex-direction:row;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+  .side .tabs::-webkit-scrollbar{display:none}
+  .side .tab{width:auto;flex:none;padding:9px 12px}
+  .side-out{width:auto;flex:none;padding:9px}
+  .side-out .lbl{display:none}
+  .top{padding-top:16px}
+}
+@media (max-width:640px){
+  .dash{grid-template-columns:minmax(0,1fr);grid-template-areas:"total" "right" "proj" "promo"}
+  .card{padding:18px}
+  .card-h{flex-wrap:wrap}
+  .side .tab .lbl{display:none}
+  .side .tab[aria-selected="true"] .lbl{display:inline}
+  .filters2{grid-template-columns:1fr}
+  .irow{grid-template-columns:minmax(0,1fr)}
+  .kpi{padding:14px 16px}
+  .kpi strong{font-size:1.08rem;word-break:normal}
+  .inv{padding:18px}
+}
+@media print{
+  body{background:#fff !important;padding:0}
+  body>*:not(#print-area){display:none !important}
+  #print-area{display:block}
+  #print-area .inv{border-radius:0;padding:0;margin:0}
+}
 </style>
 </head>
 <body>
@@ -167,7 +344,7 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
   </div>
   <div class="card">
     <h1>Bon <span>retour</span></h1>
-    <p class="mute sub">Connectez-vous pour gérer vos commandes.</p>
+    <p class="mute sub">Connectez-vous pour gérer vos projets.</p>
     <form id="login-form" novalidate>
       <div class="ifield">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
@@ -202,39 +379,90 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
 
 <!-- Application -->
 <div id="view-app" hidden>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><img src="images/logo-sultan-agency.png" alt="" width="44" height="44"><span>Sultan Agency</span></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-btn-home" aria-selected="true" type="button" data-tab="home" title="Tableau de bord"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="lbl">Tableau de bord</span></button>
+      <button class="tab" role="tab" id="tab-btn-orders" aria-selected="false" type="button" data-tab="orders" title="Projets"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/></svg><span class="lbl">Projets</span></button>
+      <button class="tab" role="tab" id="tab-btn-invoices" aria-selected="false" type="button" data-tab="invoices" title="Factures"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg><span class="lbl">Factures</span></button>
+      <button class="tab" role="tab" id="tab-btn-budget" aria-selected="false" type="button" data-tab="budget" title="Budget"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h2"/></svg><span class="lbl">Budget</span></button>
+      <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads" title="Demandes clients"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="lbl">Demandes</span><span class="count" id="leads-count" hidden>0</span></button>
+      <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats" title="Statistiques"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span class="lbl">Statistiques</span></button>
+      <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing" title="Tarifs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span class="lbl">Tarifs</span></button>
+      <button class="tab" role="tab" id="tab-btn-projects" aria-selected="false" type="button" data-tab="projects" title="Réalisations"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg><span class="lbl">Réalisations</span></button>
+      <button class="tab" role="tab" id="tab-btn-gallery" aria-selected="false" type="button" data-tab="gallery" title="Galerie"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg><span class="lbl">Galerie</span></button>
+    </nav>
+    <button class="side-out" id="logout" type="button" title="Déconnexion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M15 8l4 4-4 4M9 12h10"/></svg><span class="lbl">Déconnexion</span></button>
+  </aside>
+  <div class="content">
   <header class="top">
-    <div class="brand">Sultan Agency</div>
-    <div class="who"><button class="btn btn-ghost btn-sm" id="notif" type="button" hidden>Activer les alertes</button><span id="who"></span><button class="btn btn-ghost btn-sm" id="logout" type="button">Déconnexion</button></div>
+    <div class="hello"><strong>Bonjour</strong><small id="today"></small></div>
+    <div class="who"><button class="btn btn-ghost btn-sm" id="notif" type="button" hidden>Activer les alertes</button><span id="who"></span></div>
   </header>
   <main>
-    <nav class="tabs" role="tablist" aria-label="Sections">
-      <button class="tab" role="tab" id="tab-btn-orders" aria-selected="true" type="button" data-tab="orders">Commandes</button>
-      <button class="tab" role="tab" id="tab-btn-leads" aria-selected="false" type="button" data-tab="leads">Demandes clients<span class="count" id="leads-count" hidden>0</span></button>
-      <button class="tab" role="tab" id="tab-btn-stats" aria-selected="false" type="button" data-tab="stats">Statistiques</button>
-      <button class="tab" role="tab" id="tab-btn-pricing" aria-selected="false" type="button" data-tab="pricing">Tarifs</button>
-      <button class="tab" role="tab" id="tab-btn-projects" aria-selected="false" type="button" data-tab="projects">Réalisations</button>
-      <button class="tab" role="tab" id="tab-btn-gallery" aria-selected="false" type="button" data-tab="gallery">Galerie</button>
-    </nav>
-    <div id="tab-orders">
+    <div id="tab-home">
+      <div class="dash">
+        <section class="card c-total" aria-label="Total généré">
+          <div class="card-h">
+            <div><small>Total généré</small><strong class="big" id="h-total">0</strong><span class="pill" id="h-rate"></span></div>
+            <div class="chips" id="h-range" role="group" aria-label="Période du graphique">
+              <button type="button" data-r="12" aria-pressed="true">12 mois</button><button type="button" data-r="6" aria-pressed="false">6 mois</button><button type="button" data-r="3" aria-pressed="false">3 mois</button>
+            </div>
+          </div>
+          <div id="h-area"></div>
+          <div class="legend"><span><i class="dot g"></i>Montant signé par mois</span><span class="mute" id="h-avg"></span></div>
+        </section>
+        <aside class="card c-right" aria-label="Encaissements">
+          <div class="paycard">
+            <small>Reste à encaisser</small>
+            <strong id="h-rest">0</strong>
+            <div class="meter"><i id="h-meter"></i></div>
+            <div class="pc-row"><span>Encaissé</span><b id="h-paid">0</b></div>
+          </div>
+          <div class="pc-actions">
+            <button class="btn2" type="button" id="h-new">Nouveau projet</button>
+            <button class="btn2 gold" type="button" data-go="invoices">Factures</button>
+          </div>
+          <div class="card-h"><h2>Factures récentes</h2><button class="link" type="button" data-go="invoices">Tout voir</button></div>
+          <div id="h-recent"></div>
+        </aside>
+        <section class="card promo" aria-label="Demandes clients">
+          <small>Demandes clients</small>
+          <strong class="big" id="h-leads">0</strong>
+          <p id="h-leads-txt">Aucune nouvelle demande.</p>
+          <button class="btn2 white" type="button" data-go="leads">Voir les demandes</button>
+        </section>
+        <section class="card c-proj" aria-label="Projets en cours">
+          <div class="card-h"><h2>Projets en cours</h2><button class="link" type="button" data-go="orders">Tout voir</button></div>
+          <div id="h-projects"></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="tab-orders" hidden>
     <div class="head">
-      <div><h1>Commandes</h1><p>Suivez ce que vous avez généré et ce qu'il reste à encaisser.</p></div>
-      <button class="btn btn-primary" id="add" type="button">Ajouter une commande</button>
+      <div><h1>Projets</h1><p>Vos projets clients, en cours ou terminés, avec leur budget et ce qu'il reste à encaisser.</p></div>
+      <button class="btn btn-primary" id="add" type="button">Ajouter un projet</button>
     </div>
 
     <div class="kpis" id="kpis">
-      <div class="kpi gold"><small>Total généré</small><strong id="k-total">0</strong></div>
+      <div class="kpi gold"><small>Budget total</small><strong id="k-total">0</strong></div>
       <div class="kpi"><small>Encaissé</small><strong id="k-paid">0</strong></div>
       <div class="kpi"><small>Reste à encaisser</small><strong id="k-rest">0</strong></div>
-      <div class="kpi"><small>Commandes</small><strong id="k-count">0</strong></div>
+      <div class="kpi"><small>Projets</small><strong id="k-count">0</strong></div>
     </div>
 
     <div class="chart-box">
-      <h2>Total généré par mois</h2>
+      <h2>Budget signé par mois</h2>
       <div id="chart"></div>
     </div>
 
-    <div class="filters">
-      <select id="f-status" aria-label="Filtrer par statut">
+    <div class="chips" id="f-chips" role="group" aria-label="Filtrer par statut">
+      <button type="button" data-s="" aria-pressed="true">Tous</button><button type="button" data-s="nouveau" aria-pressed="false">Nouveaux</button><button type="button" data-s="en_cours" aria-pressed="false">En cours</button><button type="button" data-s="termine" aria-pressed="false">Terminés</button><button type="button" data-s="annule" aria-pressed="false">Annulés</button>
+    </div>
+    <div class="filters filters2">
+      <select id="f-status" aria-label="Filtrer par statut" hidden>
         <option value="">Tous les statuts</option>
         <option value="nouveau">Nouveau</option>
         <option value="en_cours">En cours</option>
@@ -251,12 +479,45 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
     </div>
 
     <div class="split">
-      <section class="panel" aria-label="Liste des commandes">
-        <h2>Toutes les commandes</h2>
+      <section class="panel" aria-label="Liste des projets">
+        <h2>Tous les projets</h2>
         <div id="list"></div>
       </section>
-      <section class="panel" aria-label="Détail de la commande" id="detail-panel"></section>
+      <section class="panel" aria-label="Détail du projet" id="detail-panel"></section>
     </div>
+    </div>
+
+    <div id="tab-invoices" hidden>
+      <div class="head">
+        <div><h1>Factures</h1><p>Une facture par projet : ce qui est payé, l'acompte reçu et ce qui reste dû.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi gold"><small>Facturé</small><strong id="i-total">0</strong></div>
+        <div class="kpi"><small>Payé</small><strong id="i-paid">0</strong></div>
+        <div class="kpi"><small>Reste dû</small><strong id="i-rest">0</strong></div>
+        <div class="kpi"><small>Factures à solder</small><strong id="i-open">0</strong></div>
+      </div>
+      <div class="chips" id="i-chips" role="group" aria-label="Filtrer les factures">
+        <button type="button" data-s="" aria-pressed="true">Toutes</button><button type="button" data-s="payee" aria-pressed="false">Payées</button><button type="button" data-s="acompte" aria-pressed="false">Acompte reçu</button><button type="button" data-s="impayee" aria-pressed="false">Impayées</button>
+      </div>
+      <section class="panel" aria-label="Liste des factures"><div id="i-list"></div></section>
+    </div>
+
+    <div id="tab-budget" hidden>
+      <div class="head">
+        <div><h1>Budget</h1><p>Ce que vos projets rapportent, par type de prestation et par mois.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi gold"><small>Budget signé</small><strong id="b-total">0</strong></div>
+        <div class="kpi"><small>Encaissé</small><strong id="b-paid">0</strong></div>
+        <div class="kpi"><small>Taux d'encaissement</small><strong id="b-rate">0 %</strong></div>
+        <div class="kpi"><small>Budget moyen par projet</small><strong id="b-avg">0</strong></div>
+      </div>
+      <div class="stgrid">
+        <section class="panel"><h2>Par type de prestation</h2><div id="b-services"></div></section>
+        <section class="panel"><h2>Par statut de projet</h2><div id="b-status"></div></section>
+      </div>
+      <section class="panel"><h2>Mois par mois</h2><div id="b-months"></div></section>
     </div>
 
     <div id="tab-leads" hidden>
@@ -349,10 +610,12 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
       <section class="panel" aria-label="Liste de la galerie"><div id="list-gallery"></div></section>
     </div>
   </main>
+  </div>
+</div>
 </div>
 
 <dialog id="dlg">
-  <h2 id="dlg-title">Nouvelle commande</h2>
+  <h2 id="dlg-title">Nouveau projet</h2>
   <form id="order-form" novalidate>
     <div class="field"><label for="o-client">Client</label><input id="o-client" maxlength="120" required></div>
     <div class="field"><label for="o-project">Projet</label><input id="o-project" maxlength="160" required></div>
@@ -369,7 +632,7 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
         </select></div>
     </div>
     <div class="two">
-      <div class="field"><label for="o-amount">Montant (FCFA)</label><input id="o-amount" type="number" inputmode="numeric" min="0" step="1" required></div>
+      <div class="field"><label for="o-amount">Budget du projet (FCFA)</label><input id="o-amount" type="number" inputmode="numeric" min="0" step="1" required></div>
       <div class="field"><label for="o-paid">Déjà encaissé (FCFA)</label><input id="o-paid" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
     </div>
     <div class="field"><label for="o-date">Date de la commande</label><input id="o-date" type="date" required></div>
@@ -393,6 +656,29 @@ dialog h2{margin-bottom:18px;font-size:1.4rem}
     </div>
   </form>
 </dialog>
+
+<dialog id="dlg-pay">
+  <h2>Enregistrer un paiement</h2>
+  <form id="pay-form" novalidate>
+    <p class="mute" id="pay-info" style="margin-bottom:16px"></p>
+    <div class="field"><label for="pay-amount">Montant reçu (FCFA)</label><input id="pay-amount" type="number" inputmode="numeric" min="1" step="1" required></div>
+    <p class="msg" id="pay-msg" role="alert"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" type="button" id="pay-cancel">Annuler</button>
+      <button class="btn btn-primary" type="submit" id="pay-save">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-inv" class="wide">
+  <div id="inv-doc"></div>
+  <div class="dlg-actions">
+    <button class="btn btn-ghost" type="button" id="inv-close">Fermer</button>
+    <button class="btn btn-primary" type="button" id="inv-print">Imprimer ou enregistrer en PDF</button>
+  </div>
+</dialog>
+
+<div id="print-area" aria-hidden="true"></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
