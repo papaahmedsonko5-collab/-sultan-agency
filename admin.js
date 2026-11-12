@@ -70,6 +70,7 @@
       show('app');
       loadOrders();
       loadLeads();
+      loadExpenses();
       loadCrud('pricing');
       loadCrud('projects');
       loadCrud('gallery');
@@ -309,6 +310,7 @@
     renderHome();
     renderInvoices();
     renderBudget();
+    renderExpenses();
   }
 
   /* ---------- Formulaire ---------- */
@@ -1122,6 +1124,7 @@
       b.addEventListener('click', function () { selectedId = o.id; filters.status = ''; $('#f-status').value = ''; setChips($('#f-chips'), '', 'data-s'); render(); goTab('orders'); });
       pj.appendChild(b);
     });
+    $('#h-exp').textContent = money(expTotal());
     renderHomeLeads();
   }
 
@@ -1272,6 +1275,12 @@
     $('#b-paid').textContent = money(s.paid);
     $('#b-rate').textContent = (s.total ? Math.round(s.paid / s.total * 100) : 0) + ' %';
     $('#b-avg').textContent = money(act.length ? s.total / act.length : 0);
+    var ex = expTotal(), net = s.paid - ex, nowK = isoDate(new Date()).slice(0, 7);
+    $('#b-exp').textContent = money(ex);
+    $('#b-exp-m').textContent = money(expTotal(nowK));
+    $('#b-net').textContent = signed(net);
+    $('#b-net').className = net < 0 ? 'neg' : '';
+    $('#b-margin').textContent = (s.paid ? Math.round(net / s.paid * 100) : 0) + '\u00a0%';
     function ranks(id, groups, labels) {
       var root = $(id);
       root.textContent = '';
@@ -1299,19 +1308,165 @@
     var root = $('#b-months');
     root.textContent = '';
     var gm = group(act, function (o) { return o.ordered_on.slice(0, 7); });
+    var em = {};
+    expenses.forEach(function (x) { var k = x.spent_on.slice(0, 7); em[k] = (em[k] || 0) + Number(x.amount); if (!gm[k]) gm[k] = { total: 0, paid: 0, n: 0 }; });
     var keys = Object.keys(gm).sort().reverse();
     if (!keys.length) { root.appendChild(el('p', 'state', 'Aucune donnée pour le moment.')); return; }
     var wrap = el('div', 'scroll'), t = el('table', 'mtable'), hr = el('tr');
-    ['Mois', 'Projets', 'Budget signé', 'Encaissé', 'Reste'].forEach(function (x) { hr.appendChild(el('th', null, x)); });
+    ['Mois', 'Projets', 'Budget signé', 'Encaissé', 'Reste', 'Dépenses'].forEach(function (x) { hr.appendChild(el('th', null, x)); });
     t.appendChild(hr);
     keys.forEach(function (k) {
       var g = gm[k], tr = el('tr');
-      [MONTHS[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4), String(g.n), money(g.total), money(g.paid), money(g.total - g.paid)].forEach(function (x) { tr.appendChild(el('td', null, x)); });
+      [MONTHS[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4), String(g.n), money(g.total), money(g.paid), money(g.total - g.paid), money(em[k] || 0)].forEach(function (x) { tr.appendChild(el('td', null, x)); });
       t.appendChild(tr);
     });
     wrap.appendChild(t);
     root.appendChild(wrap);
   }
+
+  /* Dépenses */
+  var CATS = { materiel: 'Matériel', logiciel: 'Logiciels et abonnements', sous_traitance: 'Sous-traitance', transport: 'Transport', publicite: 'Publicité', hebergement: 'Hébergement et domaines', remuneration: 'Rémunération', autre: 'Autre' };
+  var expenses = [];
+  var expError = '';
+  var expFilter = '';
+  var expEditing = null;
+  function signed(n) { return (n < 0 ? '− ' : '') + money(Math.abs(n)); }
+  function expTotal(month) {
+    var t = 0;
+    expenses.forEach(function (x) { if (!month || x.spent_on.slice(0, 7) === month) t += Number(x.amount); });
+    return t;
+  }
+  function loadExpenses() {
+    sb.from('expenses').select('*').order('spent_on', { ascending: false }).order('created_at', { ascending: false }).then(function (res) {
+      if (res.error) { expenses = []; expError = 'Le suivi des dépenses n\'est pas encore activé ou n\'a pas pu être chargé.'; }
+      else { expenses = res.data || []; expError = ''; }
+      renderExpenses();
+      renderHome();
+      renderBudget();
+    });
+  }
+  function renderExpenses() {
+    var paid = sums(activeOrders()).paid, total = expTotal(), net = paid - total;
+    $('#e-total').textContent = money(total);
+    $('#e-month').textContent = money(expTotal(isoDate(new Date()).slice(0, 7)));
+    $('#e-net').textContent = signed(net);
+    $('#e-net').className = net < 0 ? 'neg' : '';
+    $('#e-count').textContent = String(expenses.length);
+    $('#add-exp').disabled = !!expError;
+
+    var chips = $('#e-chips');
+    chips.textContent = '';
+    var used = {};
+    expenses.forEach(function (x) { used[x.category] = true; });
+    [''].concat(Object.keys(CATS).filter(function (k) { return used[k]; })).forEach(function (k) {
+      var b = el('button', null, k ? CATS[k] : 'Toutes'); b.type = 'button';
+      b.setAttribute('data-s', k);
+      b.setAttribute('aria-pressed', String(k === expFilter));
+      chips.appendChild(b);
+    });
+
+    var root = $('#e-list');
+    root.textContent = '';
+    if (expError) { root.appendChild(el('p', 'state', expError)); }
+    else {
+      var list = expenses.filter(function (x) { return !expFilter || x.category === expFilter; });
+      if (!list.length) root.appendChild(el('p', 'state', expenses.length ? 'Aucune dépense dans cette catégorie.' : 'Aucune dépense enregistrée. Ajoutez la première.'));
+      list.forEach(function (x) {
+        var r = el('div', 'crow'), info = el('div', 'info');
+        info.appendChild(el('b', null, x.label));
+        var o = x.order_id ? orders.filter(function (y) { return y.id === x.order_id; })[0] : null;
+        info.appendChild(el('small', null, fmtDate(x.spent_on) + ' · ' + (CATS[x.category] || x.category) + (o ? ' · ' + o.client_name : '')));
+        if (x.notes) info.appendChild(el('small', null, x.notes));
+        r.appendChild(info);
+        var a = el('div', 'acts');
+        a.appendChild(el('span', 'amt', money(x.amount)));
+        var ed = el('button', 'btn btn-ghost btn-sm', 'Modifier'); ed.type = 'button';
+        ed.addEventListener('click', function () { openExp(x); });
+        var del = el('button', 'btn btn-danger btn-sm', 'Supprimer'); del.type = 'button';
+        del.addEventListener('click', function () {
+          if (!window.confirm('Supprimer la dépense « ' + x.label + ' » (' + money(x.amount) + ') ? Cette action est définitive.')) return;
+          sb.from('expenses').delete().eq('id', x.id).then(function (res) {
+            if (res.error) { toast('Suppression impossible', true); return; }
+            toast('Dépense supprimée');
+            loadExpenses();
+          });
+        });
+        a.appendChild(ed); a.appendChild(del);
+        r.appendChild(a);
+        root.appendChild(r);
+      });
+    }
+
+    var cats = $('#e-cats');
+    cats.textContent = '';
+    var g = {};
+    expenses.forEach(function (x) { g[x.category] = (g[x.category] || 0) + Number(x.amount); });
+    var keys = Object.keys(g).sort(function (a, b) { return g[b] - g[a]; });
+    if (!keys.length) cats.appendChild(el('p', 'state', 'Aucune donnée pour le moment.'));
+    keys.forEach(function (k) {
+      var r = el('div', 'rank'), r1 = el('div', 'r1');
+      r1.appendChild(el('span', null, CATS[k] || k));
+      r1.appendChild(el('b', null, money(g[k])));
+      r.appendChild(r1);
+      var bar = el('div', 'bar'); bar.style.width = Math.max(2, g[k] / g[keys[0]] * 100) + '%';
+      r.appendChild(bar);
+      cats.appendChild(r);
+    });
+  }
+  var dlgExp = $('#dlg-exp');
+  function openExp(x) {
+    expEditing = x ? x.id : null;
+    $('#exp-title').textContent = x ? 'Modifier la dépense' : 'Nouvelle dépense';
+    var cat = $('#x-cat');
+    cat.textContent = '';
+    Object.keys(CATS).forEach(function (k) { var o = el('option', null, CATS[k]); o.value = k; cat.appendChild(o); });
+    var sel = $('#x-order');
+    sel.textContent = '';
+    var none = el('option', null, 'Aucun (dépense générale)'); none.value = ''; sel.appendChild(none);
+    orders.forEach(function (o) { var op = el('option', null, o.client_name + ' · ' + o.project_title); op.value = o.id; sel.appendChild(op); });
+    $('#x-label').value = x ? x.label : '';
+    cat.value = x ? x.category : 'autre';
+    $('#x-amount').value = x ? x.amount : '';
+    $('#x-date').value = x ? x.spent_on : isoDate(new Date());
+    sel.value = x && x.order_id ? x.order_id : '';
+    $('#x-notes').value = x && x.notes ? x.notes : '';
+    $('#exp-msg').textContent = '';
+    dlgExp.showModal();
+    $('#x-label').focus();
+  }
+  $('#add-exp').addEventListener('click', function () { openExp(null); });
+  $('#exp-cancel').addEventListener('click', function () { dlgExp.close(); });
+  $('#exp-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = $('#exp-msg');
+    var rec = {
+      label: $('#x-label').value.trim(),
+      category: $('#x-cat').value,
+      amount: parseInt($('#x-amount').value, 10),
+      spent_on: $('#x-date').value,
+      order_id: $('#x-order').value || null,
+      notes: $('#x-notes').value.trim() || null
+    };
+    if (!rec.label) { msg.textContent = 'Indiquez le libellé.'; return; }
+    if (isNaN(rec.amount) || rec.amount < 0) { msg.textContent = 'Le montant doit être un nombre positif.'; return; }
+    if (!rec.spent_on) { msg.textContent = 'Indiquez la date.'; return; }
+    msg.textContent = '';
+    var save = $('#exp-save');
+    save.disabled = true;
+    var q = expEditing ? sb.from('expenses').update(rec).eq('id', expEditing).select().single() : sb.from('expenses').insert(rec).select().single();
+    q.then(function (res) {
+      save.disabled = false;
+      if (res.error) { msg.textContent = 'Enregistrement impossible : ' + res.error.message; return; }
+      dlgExp.close();
+      toast(expEditing ? 'Dépense modifiée' : 'Dépense ajoutée');
+      loadExpenses();
+    });
+  });
+  $('#e-chips').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    expFilter = b.getAttribute('data-s');
+    renderExpenses();
+  });
 
   $('#h-range').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -1374,6 +1529,7 @@
     if (!userId || document.hidden) return;
     loadOrders(true);
     loadLeads();
+    loadExpenses();
   }
   document.addEventListener('visibilitychange', refreshAll);
   setInterval(refreshAll, 30000);
