@@ -762,8 +762,46 @@ a.pcard-shot:hover img.shot-mobile{transform:translateX(-50%) translateY(-8px)}
 .h-final h2{margin:16px 0 14px;font-size:clamp(2.2rem,4.6vw,3.4rem)}
 .h-final p{color:#cfc7ba}
 
+/* Avis clients */
+.h-avis{padding:clamp(20px,3vw,40px) 0 clamp(60px,7vw,90px);background:var(--nuit)}
+.h-avis-in{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,5vw,64px);align-items:center}
+.h-avis-head h2{margin:16px 0 14px;font-size:clamp(1.9rem,3.4vw,2.6rem)}
+.h-avis-head p{color:var(--mute);max-width:440px}
+.h-reviews{list-style:none;display:grid;gap:16px}
+.h-review{padding:clamp(20px,2.6vw,30px);border:1px solid rgba(201,162,74,.35);border-radius:var(--r);background:radial-gradient(70% 90% at 100% 0%,var(--glow),transparent 70%),var(--nuit-2)}
+.h-review header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.h-review .av{display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:50%;background:var(--or);color:var(--encre);font:700 .9rem var(--sans);letter-spacing:.04em}
+.h-review header b{display:block;font:700 1.02rem var(--sans);color:#f4efe6}
+.h-review header small{display:block;margin-top:2px;font-size:.84rem;color:var(--mute)}
+.h-review .bub{width:fit-content;max-width:94%;margin-bottom:10px;padding:13px 18px;border-radius:4px 20px 20px 20px;background:#f4efe6;color:var(--encre);font-size:1.08rem;line-height:1.45}
+.h-review .bub small{display:block;margin-top:3px;font-size:.86rem;color:#6b6358}
+.h-review .src{margin-top:18px;font:600 .68rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+
+/* FAQ */
+.h-faq{padding:clamp(64px,8vw,110px) 0 clamp(50px,6vw,80px);background:radial-gradient(50% 60% at 0% 0%,var(--glow),transparent 70%),var(--nuit)}
+.h-faq-in{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:clamp(24px,5vw,72px);align-items:start}
+.h-faq-head{position:sticky;top:96px}
+.h-faq-head h2{margin:16px 0 14px;font-size:clamp(1.9rem,3.4vw,2.6rem)}
+.h-faq-head p{color:var(--mute);max-width:420px}
+.h-faq-list{display:grid;gap:10px}
+.h-q{border:1px solid var(--line);border-radius:18px;background:var(--nuit-2);transition:border-color .25s}
+.h-q[open]{border-color:rgba(201,162,74,.55)}
+.h-q summary{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:64px;padding:16px 22px;cursor:pointer;list-style:none;font:600 1.02rem/1.35 var(--sans);color:#f4efe6;-webkit-tap-highlight-color:transparent}
+.h-q summary::-webkit-details-marker{display:none}
+.h-q summary::after{content:"";flex:none;width:30px;height:30px;border:1px solid var(--or);border-radius:50%;background:linear-gradient(var(--or),var(--or)) center/12px 1.5px no-repeat,linear-gradient(var(--or),var(--or)) center/1.5px 12px no-repeat;transition:transform .25s}
+.h-q[open] summary::after{transform:rotate(45deg)}
+.h-q summary:hover{color:var(--or)}
+.h-q summary:focus-visible{outline:2px solid var(--or);outline-offset:-2px;border-radius:18px}
+.h-q .a{padding:0 22px 22px;color:#cfc7ba;font-size:.98rem;line-height:1.65}
+.h-q .a p{max-width:62ch}
+.h-q .a p+p{margin-top:10px}
+.h-q .a strong{color:#f4efe6;font-weight:600}
+.h-q .a a{color:var(--or);text-decoration:underline;text-underline-offset:3px}
+.h-faq+.h-final{margin-top:0;padding-top:clamp(70px,8vw,100px)}
+
 @media (max-width:1000px){
-  .h-services-in,.h-split{grid-template-columns:1fr}
+  .h-services-in,.h-split,.h-avis-in,.h-faq-in{grid-template-columns:1fr}
+  .h-faq-head{position:static}
   .h-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .h-pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -797,4 +835,24 @@ a.pcard-shot:hover img.shot-mobile{transform:translateX(-50%) translateY(-8px)}
   .h-pgrid{gap:10px}
   .h-pgrid .cap{padding:12px}
   .h-pgrid .go{display:none}
+}
+
+/* Retouches mobile de l'accueil : textes plus lisibles, cartes plus aérées */
+@media (max-width:760px){
+  .h-row-head h2{font-size:1.7rem}
+  .h-cards span:last-child{font-size:.92rem}
+  .h-tools li{font-size:.76rem}
+  .h-timeline{gap:22px}
+  .h-timeline b{font-size:1rem}
+  .h-timeline span{font-size:.95rem;line-height:1.5}
+  .h-q summary{padding:14px 18px;font-size:1rem}
+  .h-q .a{padding:0 18px 20px;font-size:.97rem}
+  .h-review .bub{max-width:100%;font-size:1.02rem}
+  .h-faq .h-cta>*{flex:1 1 100%;justify-content:center}
+}
+@media (max-width:520px){
+  .h-founder{grid-template-columns:72px 1fr;grid-template-areas:"img cap" "quote quote";gap:18px 16px;align-items:center}
+  .h-founder img{grid-area:img;width:72px;height:72px}
+  .h-founder figcaption{grid-area:cap;border-top:0;padding-top:0}
+  .h-founder blockquote{grid-area:quote;font-size:1.3rem}
 }
